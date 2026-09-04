@@ -141,6 +141,10 @@ Three real issues found and fixed during this build — full detail in
    own rules permitted — caught by tracing the gate's evaluation order by hand
    during plan review, before any code existed, not by a failing test.
 
+## The report itself is designed, not just dumped
+
+The batch report (`report.html`) is the only "frontend" this project has — the rest is a CLI and a JSON/Markdown log. It's built with the **[Impeccable](https://github.com/pbakaus/impeccable)** design skill (installed into this environment specifically for this), following its full direction-selection process: `PRODUCT.md` and `DESIGN.md` at the repo root record the product truth and the built visual world (an audit-dossier / evidence-board direction — exhibits, a case number, a chain-of-custody ledger — chosen via the skill's own resonance-ranked candidate roll, seed `9f883699`). Screenshots and the direction contract are in `.impeccable/review/` and `.impeccable/surfaces/`. The mechanical anti-pattern detector ran clean (0 findings) after three real fix rounds — undersized functional text, banned kicker/eyebrow copy, a mobile horizontal-overflow bug in the confusion matrix — all caught by actually screenshotting both viewports and running the detector, not by assumption.
+
 ## The whole process, not just the code
 
 This project is built with **[AI-DLC](aidlc-docs/README.md)** — an AI-Driven Development Lifecycle in which the process is as inspectable as the code:

@@ -1,48 +1,2132 @@
 <!doctype html>
-<html><head><meta charset="utf-8"><title>Rebound batch report</title>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rebound — Batch Audit Report EADD3E2E</title>
 <style>
-body { font-family: system-ui, sans-serif; max-width: 960px; margin: 2rem auto; color: #1a1a1a; background:#fafafa; }
-table { border-collapse: collapse; width: 100%; margin: 1rem 0; background: white; }
-th, td { border: 1px solid #ccc; padding: 0.4rem 0.8rem; text-align: left; }
-.metric { font-size: 1.6rem; font-weight: bold; }
-.zero-required { color: #0a7d2c; }
-section { margin-bottom: 2rem; padding: 1rem 1.5rem; background: white; border-radius: 8px; border: 1px solid #e5e5e5; }
-h1 { color: #1a1a2e; }
-h2 { color: #333; border-bottom: 2px solid #eee; padding-bottom: 0.3rem; }
-code { background: #f0f0f0; padding: 0.1rem 0.3rem; border-radius: 3px; }
-</style></head>
+:root {
+  --ground:#0a0b0d; --panel:#0f1114; --ink:#e8e6df; --dim:#8a8d94; --hair:#26282d;
+  --amber:#e8a33d; --ok:#7fae6c; --warn:#e8a33d; --bad:#c06a5f;
+  --mono: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+* { box-sizing:border-box; }
+::selection { background:var(--amber); color:#0a0b0d; }
+body {
+  margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans);
+  font-size:16px; line-height:1.5; -webkit-font-smoothing:antialiased;
+}
+a { color:var(--amber); }
+.mono { font-family:var(--mono); font-variant-numeric:tabular-nums; }
+.dim { color:var(--dim); }
+.wrap { max-width:960px; margin:0 auto; padding:0 28px 80px; }
+
+/* ---- case header ---- */
+.case-head {
+  display:flex; justify-content:space-between; align-items:flex-end;
+  padding:36px 0 20px; border-bottom:1px solid var(--hair);
+}
+.case-head h1 { margin:0; font-size:27px; font-weight:600; letter-spacing:-0.01em; }
+.case-head h1 .dim-part { color:var(--dim); font-weight:500; }
+.case-meta { text-align:right; font-family:var(--mono); font-size:12px; color:var(--dim); letter-spacing:.03em; line-height:1.8; }
+.case-meta .case-no { color:var(--amber); font-size:14px; }
+
+/* ---- verdict (exhibit A) ---- */
+.verdict-strip { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--hair); margin:24px 0 0; border:1px solid var(--hair); }
+.verdict-item { background:var(--panel); padding:22px 20px; position:relative; }
+.verdict-id { font-family:var(--mono); font-size:11px; color:var(--dim); letter-spacing:.1em; }
+.verdict-value { font-family:var(--mono); font-size:56px; font-weight:600; margin:4px 0; font-variant-numeric:tabular-nums; }
+.verdict-item.ok .verdict-value { color:var(--ok); }
+.verdict-item.bad .verdict-value { color:var(--bad); }
+.verdict-label { font-size:14px; color:var(--ink); }
+.verdict-stamp {
+  position:absolute; top:18px; right:18px; font-family:var(--mono); font-size:11px;
+  letter-spacing:.1em; padding:3px 8px; border:1px solid currentColor;
+}
+.verdict-item.ok .verdict-stamp { color:var(--ok); }
+.verdict-item.bad .verdict-stamp { color:var(--bad); }
+.verdict-footnote { font-size:13px; color:var(--dim); margin:14px 2px 0; }
+.verdict-footnote b { color:var(--ink); font-weight:600; }
+
+/* ---- exhibits ---- */
+.exhibit { position:relative; margin-top:52px; padding:0 2px; }
+.tick { position:absolute; width:10px; height:10px; border:1px solid var(--amber); opacity:.55; }
+.tick.tl { top:-1px; left:-1px; border-right:none; border-bottom:none; }
+.tick.tr { top:-1px; right:-1px; border-left:none; border-bottom:none; }
+.tick.bl { bottom:-1px; left:-1px; border-right:none; border-top:none; }
+.tick.br { bottom:-1px; right:-1px; border-left:none; border-top:none; }
+.exhibit-head { display:flex; align-items:baseline; gap:14px; padding:14px 4px; border-bottom:1px solid var(--hair); }
+.exhibit-tag { font-family:var(--mono); font-size:11px; letter-spacing:.14em; color:var(--amber); flex-shrink:0; }
+.exhibit-head h2 { margin:0; font-size:16px; font-weight:600; color:var(--ink); }
+.exhibit-body { padding:20px 4px 4px; }
+
+/* ---- tables ---- */
+table { width:100%; border-collapse:collapse; }
+th { text-align:left; font-family:var(--mono); font-size:11px; letter-spacing:.08em; color:var(--dim); text-transform:uppercase; font-weight:500; padding:0 12px 10px 0; border-bottom:1px solid var(--hair); }
+td { padding:11px 12px 11px 0; border-bottom:1px solid var(--hair); font-size:14px; }
+tr:last-child td { border-bottom:none; }
+.num { text-align:right; }
+.cause-name { color:var(--ink); }
+.chip { display:inline-block; min-width:28px; padding:2px 8px; font-family:var(--mono); font-size:13px; text-align:center; border:1px solid currentColor; }
+.chip.ok { color:var(--ok); } .chip.warn { color:var(--warn); } .chip.bad { color:var(--bad); } .chip.dim { color:var(--dim); border-color:var(--hair); }
+
+/* ---- classifier summary ---- */
+.stat-row { display:flex; gap:40px; margin-bottom:22px; }
+.stat { }
+.stat .n { font-family:var(--mono); font-size:32px; font-weight:600; color:var(--ink); }
+.stat .l { font-size:12px; color:var(--dim); margin-top:2px; }
+.confusion { margin-top:22px; border-top:1px solid var(--hair); padding-top:16px; }
+.confusion-label { font-family:var(--mono); font-size:12px; letter-spacing:.02em; color:var(--dim); margin-bottom:10px; }
+.confusion-row { display:flex; align-items:center; flex-wrap:wrap; gap:6px 10px; font-size:13px; padding:4px 0; overflow-wrap:anywhere; }
+.arrow { color:var(--dim); }
+
+/* ---- citations / ledger / flags: monospace evidence lists ---- */
+.citation-row, .ledger-row, .flag-row {
+  display:grid; align-items:center; gap:14px; padding:8px 0; border-bottom:1px solid var(--hair); font-size:13px;
+}
+.citation-row { grid-template-columns:110px 20px 190px 1fr; }
+.ledger-row { grid-template-columns:56px 150px 140px 1fr; }
+.flag-row { grid-template-columns:110px 190px 1fr; }
+.citation-row:last-child, .ledger-row:last-child, .flag-row:last-child { border-bottom:none; }
+.citation-source { color:var(--dim); }
+.ledger-stage { text-transform:uppercase; font-size:12px; letter-spacing:.03em; color:var(--dim); }
+.ledger-hash { color:var(--amber); }
+.flag-reason { color:var(--dim); }
+.flag-empty { font-size:13px; color:var(--dim); padding:10px 0; }
+.ledger-scroll { max-height:340px; overflow-y:auto; }
+.ledger-scroll::-webkit-scrollbar { width:8px; }
+.ledger-scroll::-webkit-scrollbar-track { background:var(--panel); }
+.ledger-scroll::-webkit-scrollbar-thumb { background:var(--hair); }
+.ledger-note { font-size:12px; color:var(--dim); margin-top:12px; }
+
+/* ---- signed statement ---- */
+.statement {
+  margin-top:52px; border:1px solid var(--hair); padding:26px 28px; background:var(--panel); position:relative;
+}
+.statement p { margin:0 0 10px; font-size:14px; color:var(--ink); }
+.statement p:last-of-type { margin-bottom:0; }
+.statement .sign { margin-top:18px; padding-top:16px; border-top:1px solid var(--hair); font-family:var(--mono); font-size:12px; letter-spacing:.04em; color:var(--dim); display:flex; justify-content:space-between; }
+
+footer { text-align:center; font-family:var(--mono); font-size:12px; color:var(--dim); letter-spacing:.04em; margin-top:60px; padding-top:24px; border-top:1px solid var(--hair); }
+
+@media (max-width:640px) {
+  .wrap { padding:0 16px 60px; }
+  .case-head { flex-direction:column; align-items:flex-start; gap:10px; }
+  .case-meta { text-align:left; }
+  .verdict-strip { grid-template-columns:1fr; }
+  .stat-row { gap:24px; flex-wrap:wrap; }
+  .citation-row { grid-template-columns:1fr; gap:2px; }
+  .ledger-row { grid-template-columns:1fr; gap:2px; }
+  .flag-row { grid-template-columns:1fr; gap:2px; }
+  th:nth-child(4), td:nth-child(4) { display:none; }
+}
+</style>
+</head>
 <body>
-<h1>Rebound — batch report</h1>
-<section>
-  <p>Duplicates rejected: <span class="metric">5</span></p>
-  <p>Double charges (must be 0): <span class="metric zero-required">0</span></p>
-  <p>Policy violations (must be 0): <span class="metric zero-required">0</span></p>
-  <p>False escalations: <span class="metric">0</span></p>
-</section>
-<section>
-  <h2>Per-cause outcomes (policy outcome, not money recovered)</h2>
-  <table><tr><th>Cause</th><th>Allowed</th><th>Blocked</th><th>Escalated</th></tr><tr><td>bank_or_gateway_error</td><td>12</td><td>0</td><td>0</td></tr><tr><td>insufficient_funds</td><td>21</td><td>0</td><td>0</td></tr><tr><td>instrument_expired_or_blocked</td><td>6</td><td>0</td><td>0</td></tr><tr><td>mandate_not_active</td><td>5</td><td>0</td><td>0</td></tr><tr><td>unknown</td><td>0</td><td>0</td><td>4</td></tr><tr><td>authentication_failed</td><td>9</td><td>0</td><td>0</td></tr><tr><td>limit_exceeded</td><td>3</td><td>0</td><td>0</td></tr></table>
-</section>
-<section>
-  <h2>Classifier (held-out, n=20)</h2>
-  <p>Overall accuracy: 1.0 · Abstain rate: 0.05</p>
-  <table><tr><th>Cause</th><th>Precision</th><th>Recall</th></tr><tr><td>authentication_failed</td><td>1.0</td><td>1.0</td></tr><tr><td>bank_or_gateway_error</td><td>1.0</td><td>1.0</td></tr><tr><td>instrument_expired_or_blocked</td><td>1.0</td><td>1.0</td></tr><tr><td>insufficient_funds</td><td>1.0</td><td>1.0</td></tr><tr><td>limit_exceeded</td><td>1.0</td><td>1.0</td></tr><tr><td>unknown</td><td>1.0</td><td>1.0</td></tr></table>
-</section>
-<section>
-  <h2>Exceptions</h2>
-  <ul><li><code>scn_9</code> (unknown): attempt 1 exceeds max 0 for unknown</li><li><code>scn_34</code> (unknown): attempt 1 exceeds max 0 for unknown</li><li><code>scn_45</code> (unknown): attempt 1 exceeds max 0 for unknown</li><li><code>scn_48</code> (unknown): attempt 1 exceeds max 0 for unknown</li></ul>
-</section>
-<section>
-  <h2>Classification citations (every non-unknown cause traced to its source field)</h2>
-  <ul><li><code>scn_0</code> → bank_or_gateway_error: error_reason=bank_technical_error</li><li><code>scn_1</code> → insufficient_funds: error_reason=insufficient_funds</li><li><code>scn_2</code> → bank_or_gateway_error: error_reason=bank_technical_error</li><li><code>scn_3</code> → insufficient_funds: error_reason=insufficient_funds</li><li><code>scn_4</code> → insufficient_funds: error_reason=insufficient_funds</li><li><code>scn_5</code> → bank_or_gateway_error: error_reason=bank_technical_error</li><li><code>scn_6</code> → instrument_expired_or_blocked: error_reason=card_expired</li><li><code>scn_7</code> → mandate_not_active: token_status=paused</li><li><code>scn_8</code> → instrument_expired_or_blocked: error_reason=card_expired</li><li><code>scn_10</code> → insufficient_funds: error_reason=insufficient_funds</li><li><code>scn_11</code> → mandate_not_active: token_status=paused</li><li><code>scn_12</code> → bank_or_gateway_error: error_reason=bank_technical_error</li><li><code>scn_13</code> → insufficient_funds: error_reason=insufficient_funds</li><li><code>scn_14</code> → authentication_failed: error_reason=authentication_failed</li><li><code>scn_15</code> → bank_or_gateway_error: error_reason=bank_technical_error</li><li><code>scn_16</code> → limit_exceeded: error_reason=transaction_limit_exceeded</li><li><code>scn_17</code> → insufficient_funds: error_reason=insufficient_funds</li><li><code>scn_18</code> → instrument_expired_or_blocked: error_reason=card_expired</li><li><code>scn_19</code> → bank_or_gateway_error: error_reason=bank_technical_error</li><li><code>scn_20</code> → authentication_failed: error_reason=authentication_failed</li><li><code>scn_21</code> → authentication_failed: error_reason=authentication_failed</li><li><code>scn_22</code> → bank_or_gateway_error: error_reason=bank_technical_error</li><li><code>scn_23</code> → mandate_not_active: token_status=paused</li><li><code>scn_24</code> → insufficient_funds: error_reason=insufficient_funds</li><li><code>scn_25</code> → insufficient_funds: error_reason=insufficient_funds</li><li><code>scn_26</code> → limit_exceeded: error_reason=transaction_limit_exceeded</li><li><code>scn_27</code> → insufficient_funds: error_reason=insufficient_funds</li><li><code>scn_28</code> → bank_or_gateway_error: error_reason=bank_technical_error</li><li><code>scn_29</code> → instrument_expired_or_blocked: error_reason=card_expired</li><li><code>scn_30</code> → insufficient_funds: error_reason=insufficient_funds</li><li><code>scn_31</code> → insufficient_funds: error_reason=insufficient_funds</li><li><code>scn_32</code> → authentication_failed: error_reason=authentication_failed</li><li><code>scn_33</code> → authentication_failed: error_reason=authentication_failed</li><li><code>scn_35</code> → bank_or_gateway_error: error_reason=bank_technical_error</li><li><code>scn_36</code> → insufficient_funds: error_reason=insufficient_funds</li><li><code>scn_37</code> → authentication_failed: error_reason=authentication_failed</li><li><code>scn_38</code> → authentication_failed: error_reason=authentication_failed</li><li><code>scn_39</code> → mandate_not_active: token_status=paused</li><li><code>scn_40</code> → instrument_expired_or_blocked: error_reason=card_expired</li><li><code>scn_41</code> → authentication_failed: error_reason=authentication_failed</li><li><code>scn_42</code> → insufficient_funds: error_reason=insufficient_funds</li><li><code>scn_43</code> → insufficient_funds: error_reason=insufficient_funds</li><li><code>scn_44</code> → insufficient_funds: error_reason=insufficient_funds</li><li><code>scn_46</code> → bank_or_gateway_error: error_reason=bank_technical_error</li><li><code>scn_47</code> → authentication_failed: error_reason=authentication_failed</li><li><code>scn_49</code> → instrument_expired_or_blocked: error_reason=card_expired</li><li><code>scn_50</code> → limit_exceeded: error_reason=transaction_limit_exceeded</li><li><code>scn_51</code> → insufficient_funds: error_reason=insufficient_funds</li><li><code>scn_52</code> → insufficient_funds: error_reason=insufficient_funds</li><li><code>scn_53</code> → insufficient_funds: error_reason=insufficient_funds</li><li><code>scn_54</code> → insufficient_funds: error_reason=insufficient_funds</li><li><code>scn_55</code> → insufficient_funds: error_reason=insufficient_funds</li><li><code>scn_56</code> → bank_or_gateway_error: error_reason=bank_technical_error</li><li><code>scn_57</code> → bank_or_gateway_error: error_reason=bank_technical_error</li><li><code>scn_58</code> → mandate_not_active: token_status=paused</li><li><code>scn_59</code> → insufficient_funds: error_reason=insufficient_funds</li></ul>
-</section>
-<section>
-  <h2>Audit chain (tamper-evident — run <code>rebound verify-audit</code> to check)</h2>
-  <table><tr><th>Seq</th><th>Stage</th><th>Subscription</th><th>Hash</th></tr><tr><td>0</td><td>event_received</td><td>sub_synth_0</td><td><code>52953d030854…</code></td></tr><tr><td>1</td><td>classified</td><td>sub_synth_0</td><td><code>47ac8808ef2a…</code></td></tr><tr><td>2</td><td>action_proposed</td><td>sub_synth_0</td><td><code>b2e24c6c55a8…</code></td></tr><tr><td>3</td><td>policy_verdict</td><td>sub_synth_0</td><td><code>de11972ff80a…</code></td></tr><tr><td>4</td><td>action_executed</td><td>sub_synth_0</td><td><code>d15a0fb4a814…</code></td></tr><tr><td>5</td><td>event_received</td><td>sub_synth_1</td><td><code>0a8219893853…</code></td></tr><tr><td>6</td><td>classified</td><td>sub_synth_1</td><td><code>ce8bad2eabbe…</code></td></tr><tr><td>7</td><td>action_proposed</td><td>sub_synth_1</td><td><code>2abb168b2041…</code></td></tr><tr><td>8</td><td>policy_verdict</td><td>sub_synth_1</td><td><code>1a7e49f75c86…</code></td></tr><tr><td>9</td><td>action_executed</td><td>sub_synth_1</td><td><code>17f7042457ef…</code></td></tr><tr><td>10</td><td>event_received</td><td>sub_synth_2</td><td><code>7c9de586ea2c…</code></td></tr><tr><td>11</td><td>classified</td><td>sub_synth_2</td><td><code>a31681c9f19b…</code></td></tr><tr><td>12</td><td>action_proposed</td><td>sub_synth_2</td><td><code>0acd85a61db6…</code></td></tr><tr><td>13</td><td>policy_verdict</td><td>sub_synth_2</td><td><code>3463d152ab3e…</code></td></tr><tr><td>14</td><td>action_executed</td><td>sub_synth_2</td><td><code>3c9cb42eb288…</code></td></tr><tr><td>15</td><td>event_received</td><td>sub_synth_3</td><td><code>c38b044a15dc…</code></td></tr><tr><td>16</td><td>classified</td><td>sub_synth_3</td><td><code>9bcde2ecbcc1…</code></td></tr><tr><td>17</td><td>action_proposed</td><td>sub_synth_3</td><td><code>7c49dd6e4e78…</code></td></tr><tr><td>18</td><td>policy_verdict</td><td>sub_synth_3</td><td><code>a14d3b278922…</code></td></tr><tr><td>19</td><td>action_executed</td><td>sub_synth_3</td><td><code>85122d281613…</code></td></tr><tr><td>20</td><td>event_received</td><td>sub_synth_4</td><td><code>3a142b609636…</code></td></tr><tr><td>21</td><td>classified</td><td>sub_synth_4</td><td><code>c741d13a32c2…</code></td></tr><tr><td>22</td><td>action_proposed</td><td>sub_synth_4</td><td><code>f027b2141440…</code></td></tr><tr><td>23</td><td>policy_verdict</td><td>sub_synth_4</td><td><code>e4cada5f7229…</code></td></tr><tr><td>24</td><td>action_executed</td><td>sub_synth_4</td><td><code>82c7ad6e4ebb…</code></td></tr><tr><td>25</td><td>event_received</td><td>sub_synth_5</td><td><code>3103f9d7c687…</code></td></tr><tr><td>26</td><td>classified</td><td>sub_synth_5</td><td><code>6d9cfb81501f…</code></td></tr><tr><td>27</td><td>action_proposed</td><td>sub_synth_5</td><td><code>655c386d96d8…</code></td></tr><tr><td>28</td><td>policy_verdict</td><td>sub_synth_5</td><td><code>339f019961ee…</code></td></tr><tr><td>29</td><td>action_executed</td><td>sub_synth_5</td><td><code>2c1316cb91bf…</code></td></tr><tr><td>30</td><td>event_received</td><td>sub_synth_6</td><td><code>016669e23b77…</code></td></tr><tr><td>31</td><td>classified</td><td>sub_synth_6</td><td><code>b68ede6c331b…</code></td></tr><tr><td>32</td><td>action_proposed</td><td>sub_synth_6</td><td><code>be8efda96664…</code></td></tr><tr><td>33</td><td>policy_verdict</td><td>sub_synth_6</td><td><code>9410bca1f1e9…</code></td></tr><tr><td>34</td><td>action_executed</td><td>sub_synth_6</td><td><code>3bf750e89cb5…</code></td></tr><tr><td>35</td><td>event_received</td><td>sub_synth_7</td><td><code>b045d2cc9ca1…</code></td></tr><tr><td>36</td><td>classified</td><td>sub_synth_7</td><td><code>e5c70771dbf3…</code></td></tr><tr><td>37</td><td>action_proposed</td><td>sub_synth_7</td><td><code>460974f70c53…</code></td></tr><tr><td>38</td><td>policy_verdict</td><td>sub_synth_7</td><td><code>771cd22baa7b…</code></td></tr><tr><td>39</td><td>action_executed</td><td>sub_synth_7</td><td><code>3e435630afc0…</code></td></tr><tr><td>40</td><td>event_received</td><td>sub_synth_8</td><td><code>aed86166a585…</code></td></tr><tr><td>41</td><td>classified</td><td>sub_synth_8</td><td><code>e9becf7c12a9…</code></td></tr><tr><td>42</td><td>action_proposed</td><td>sub_synth_8</td><td><code>68c6c4b80a15…</code></td></tr><tr><td>43</td><td>policy_verdict</td><td>sub_synth_8</td><td><code>5fad19fca429…</code></td></tr><tr><td>44</td><td>action_executed</td><td>sub_synth_8</td><td><code>397ff16ed05d…</code></td></tr><tr><td>45</td><td>event_received</td><td>sub_synth_8</td><td><code>e2c564d70dca…</code></td></tr><tr><td>46</td><td>duplicate_rejected</td><td>sub_synth_8</td><td><code>eb26bedc78dd…</code></td></tr><tr><td>47</td><td>event_received</td><td>sub_synth_9</td><td><code>d742d92dc115…</code></td></tr><tr><td>48</td><td>classified</td><td>sub_synth_9</td><td><code>b0c13571d608…</code></td></tr><tr><td>49</td><td>action_proposed</td><td>sub_synth_9</td><td><code>e041d48c65f4…</code></td></tr><tr><td>50</td><td>policy_verdict</td><td>sub_synth_9</td><td><code>1ac99ee50e09…</code></td></tr><tr><td>51</td><td>action_blocked</td><td>sub_synth_9</td><td><code>731fdd2ba5fc…</code></td></tr><tr><td>52</td><td>event_received</td><td>sub_synth_10</td><td><code>62d988c7e559…</code></td></tr><tr><td>53</td><td>classified</td><td>sub_synth_10</td><td><code>01b6d09e1edd…</code></td></tr><tr><td>54</td><td>action_proposed</td><td>sub_synth_10</td><td><code>c648cbe1277d…</code></td></tr><tr><td>55</td><td>policy_verdict</td><td>sub_synth_10</td><td><code>6399ae338ea2…</code></td></tr><tr><td>56</td><td>action_executed</td><td>sub_synth_10</td><td><code>0bd2d952056f…</code></td></tr><tr><td>57</td><td>event_received</td><td>sub_synth_11</td><td><code>81ec1890cd2b…</code></td></tr><tr><td>58</td><td>classified</td><td>sub_synth_11</td><td><code>e7173c2726e5…</code></td></tr><tr><td>59</td><td>action_proposed</td><td>sub_synth_11</td><td><code>021fe44f3b2c…</code></td></tr><tr><td>60</td><td>policy_verdict</td><td>sub_synth_11</td><td><code>230042772e9c…</code></td></tr><tr><td>61</td><td>action_executed</td><td>sub_synth_11</td><td><code>6753c3858b21…</code></td></tr><tr><td>62</td><td>event_received</td><td>sub_synth_11</td><td><code>fe6adb995482…</code></td></tr><tr><td>63</td><td>duplicate_rejected</td><td>sub_synth_11</td><td><code>8f4689ada5fd…</code></td></tr><tr><td>64</td><td>event_received</td><td>sub_synth_12</td><td><code>f0bd7d0fd416…</code></td></tr><tr><td>65</td><td>classified</td><td>sub_synth_12</td><td><code>e92988b2cd38…</code></td></tr><tr><td>66</td><td>action_proposed</td><td>sub_synth_12</td><td><code>d3c1dfcf56a9…</code></td></tr><tr><td>67</td><td>policy_verdict</td><td>sub_synth_12</td><td><code>54fe9637c1be…</code></td></tr><tr><td>68</td><td>action_executed</td><td>sub_synth_12</td><td><code>18cc5bdd47e5…</code></td></tr><tr><td>69</td><td>event_received</td><td>sub_synth_13</td><td><code>3a976ab06b1f…</code></td></tr><tr><td>70</td><td>classified</td><td>sub_synth_13</td><td><code>5de2159bdcd6…</code></td></tr><tr><td>71</td><td>action_proposed</td><td>sub_synth_13</td><td><code>1b7f1f392db1…</code></td></tr><tr><td>72</td><td>policy_verdict</td><td>sub_synth_13</td><td><code>a20611d0bd57…</code></td></tr><tr><td>73</td><td>action_executed</td><td>sub_synth_13</td><td><code>de99a593c38b…</code></td></tr><tr><td>74</td><td>event_received</td><td>sub_synth_14</td><td><code>9f23e11b5dcf…</code></td></tr><tr><td>75</td><td>classified</td><td>sub_synth_14</td><td><code>a065853c1094…</code></td></tr><tr><td>76</td><td>action_proposed</td><td>sub_synth_14</td><td><code>4a7251afa020…</code></td></tr><tr><td>77</td><td>policy_verdict</td><td>sub_synth_14</td><td><code>798e7e51a3ca…</code></td></tr><tr><td>78</td><td>action_executed</td><td>sub_synth_14</td><td><code>5fdbefae2baa…</code></td></tr><tr><td>79</td><td>event_received</td><td>sub_synth_15</td><td><code>a589126307e1…</code></td></tr><tr><td>80</td><td>classified</td><td>sub_synth_15</td><td><code>cf53e2a485f9…</code></td></tr><tr><td>81</td><td>action_proposed</td><td>sub_synth_15</td><td><code>8e3c5aebdf0b…</code></td></tr><tr><td>82</td><td>policy_verdict</td><td>sub_synth_15</td><td><code>9954938ed3b9…</code></td></tr><tr><td>83</td><td>action_executed</td><td>sub_synth_15</td><td><code>1657e9a44bbb…</code></td></tr><tr><td>84</td><td>event_received</td><td>sub_synth_16</td><td><code>a897a5b11ce0…</code></td></tr><tr><td>85</td><td>classified</td><td>sub_synth_16</td><td><code>f8162004e474…</code></td></tr><tr><td>86</td><td>action_proposed</td><td>sub_synth_16</td><td><code>1be158634498…</code></td></tr><tr><td>87</td><td>policy_verdict</td><td>sub_synth_16</td><td><code>704d6808c72a…</code></td></tr><tr><td>88</td><td>action_executed</td><td>sub_synth_16</td><td><code>5f0c3a8ee85d…</code></td></tr><tr><td>89</td><td>event_received</td><td>sub_synth_17</td><td><code>6c15cd5dceb5…</code></td></tr><tr><td>90</td><td>classified</td><td>sub_synth_17</td><td><code>d8d9e1dc94d0…</code></td></tr><tr><td>91</td><td>action_proposed</td><td>sub_synth_17</td><td><code>e6cb7c70c52b…</code></td></tr><tr><td>92</td><td>policy_verdict</td><td>sub_synth_17</td><td><code>e12553ea0283…</code></td></tr><tr><td>93</td><td>action_executed</td><td>sub_synth_17</td><td><code>a7f999ca7a0b…</code></td></tr><tr><td>94</td><td>event_received</td><td>sub_synth_17</td><td><code>7eae766c4277…</code></td></tr><tr><td>95</td><td>duplicate_rejected</td><td>sub_synth_17</td><td><code>6f41c5c0cb9a…</code></td></tr><tr><td>96</td><td>event_received</td><td>sub_synth_18</td><td><code>a7154246b2da…</code></td></tr><tr><td>97</td><td>classified</td><td>sub_synth_18</td><td><code>de5d5fec05de…</code></td></tr><tr><td>98</td><td>action_proposed</td><td>sub_synth_18</td><td><code>d5ae3d70f961…</code></td></tr><tr><td>99</td><td>policy_verdict</td><td>sub_synth_18</td><td><code>f60316325bbc…</code></td></tr><tr><td>100</td><td>action_executed</td><td>sub_synth_18</td><td><code>11fcf96b7280…</code></td></tr><tr><td>101</td><td>event_received</td><td>sub_synth_19</td><td><code>61767625b195…</code></td></tr><tr><td>102</td><td>classified</td><td>sub_synth_19</td><td><code>7d03614b2e7c…</code></td></tr><tr><td>103</td><td>action_proposed</td><td>sub_synth_19</td><td><code>1773fccab8cd…</code></td></tr><tr><td>104</td><td>policy_verdict</td><td>sub_synth_19</td><td><code>5a717de986bb…</code></td></tr><tr><td>105</td><td>action_executed</td><td>sub_synth_19</td><td><code>b28a7ee36556…</code></td></tr><tr><td>106</td><td>event_received</td><td>sub_synth_20</td><td><code>c9456891ed7e…</code></td></tr><tr><td>107</td><td>classified</td><td>sub_synth_20</td><td><code>7a154ebdcad8…</code></td></tr><tr><td>108</td><td>action_proposed</td><td>sub_synth_20</td><td><code>f73010d1c611…</code></td></tr><tr><td>109</td><td>policy_verdict</td><td>sub_synth_20</td><td><code>17af3c033572…</code></td></tr><tr><td>110</td><td>action_executed</td><td>sub_synth_20</td><td><code>a3637ce59276…</code></td></tr><tr><td>111</td><td>event_received</td><td>sub_synth_21</td><td><code>f7df1c203615…</code></td></tr><tr><td>112</td><td>classified</td><td>sub_synth_21</td><td><code>e9c6d0ac88f1…</code></td></tr><tr><td>113</td><td>action_proposed</td><td>sub_synth_21</td><td><code>e828db058a43…</code></td></tr><tr><td>114</td><td>policy_verdict</td><td>sub_synth_21</td><td><code>0a31917b2d0f…</code></td></tr><tr><td>115</td><td>action_executed</td><td>sub_synth_21</td><td><code>220079d3ef19…</code></td></tr><tr><td>116</td><td>event_received</td><td>sub_synth_22</td><td><code>832dfbe47727…</code></td></tr><tr><td>117</td><td>classified</td><td>sub_synth_22</td><td><code>9ef0f302e514…</code></td></tr><tr><td>118</td><td>action_proposed</td><td>sub_synth_22</td><td><code>7155d15eb32e…</code></td></tr><tr><td>119</td><td>policy_verdict</td><td>sub_synth_22</td><td><code>0a2c39442677…</code></td></tr><tr><td>120</td><td>action_executed</td><td>sub_synth_22</td><td><code>1807a458f645…</code></td></tr><tr><td>121</td><td>event_received</td><td>sub_synth_23</td><td><code>53095905ef6b…</code></td></tr><tr><td>122</td><td>classified</td><td>sub_synth_23</td><td><code>19123ea5954a…</code></td></tr><tr><td>123</td><td>action_proposed</td><td>sub_synth_23</td><td><code>12d266ca2e07…</code></td></tr><tr><td>124</td><td>policy_verdict</td><td>sub_synth_23</td><td><code>abd343bd6946…</code></td></tr><tr><td>125</td><td>action_executed</td><td>sub_synth_23</td><td><code>fd5b456753d8…</code></td></tr><tr><td>126</td><td>event_received</td><td>sub_synth_24</td><td><code>0d08a96dfca8…</code></td></tr><tr><td>127</td><td>classified</td><td>sub_synth_24</td><td><code>68725c62abc4…</code></td></tr><tr><td>128</td><td>action_proposed</td><td>sub_synth_24</td><td><code>ba98f1a4b4e5…</code></td></tr><tr><td>129</td><td>policy_verdict</td><td>sub_synth_24</td><td><code>c29ed67b749a…</code></td></tr><tr><td>130</td><td>action_executed</td><td>sub_synth_24</td><td><code>0eab38c73871…</code></td></tr><tr><td>131</td><td>event_received</td><td>sub_synth_25</td><td><code>38851a76259e…</code></td></tr><tr><td>132</td><td>classified</td><td>sub_synth_25</td><td><code>663d30896db4…</code></td></tr><tr><td>133</td><td>action_proposed</td><td>sub_synth_25</td><td><code>8361fcbd4777…</code></td></tr><tr><td>134</td><td>policy_verdict</td><td>sub_synth_25</td><td><code>c22e6f3ffe5d…</code></td></tr><tr><td>135</td><td>action_executed</td><td>sub_synth_25</td><td><code>8923b5549912…</code></td></tr><tr><td>136</td><td>event_received</td><td>sub_synth_26</td><td><code>efb46cd665de…</code></td></tr><tr><td>137</td><td>classified</td><td>sub_synth_26</td><td><code>be1cfcd3b0a7…</code></td></tr><tr><td>138</td><td>action_proposed</td><td>sub_synth_26</td><td><code>c896f47bd401…</code></td></tr><tr><td>139</td><td>policy_verdict</td><td>sub_synth_26</td><td><code>70904eae9921…</code></td></tr><tr><td>140</td><td>action_executed</td><td>sub_synth_26</td><td><code>d784a53083ce…</code></td></tr><tr><td>141</td><td>event_received</td><td>sub_synth_27</td><td><code>772a076dfd92…</code></td></tr><tr><td>142</td><td>classified</td><td>sub_synth_27</td><td><code>fc1175b9479e…</code></td></tr><tr><td>143</td><td>action_proposed</td><td>sub_synth_27</td><td><code>887e0057878d…</code></td></tr><tr><td>144</td><td>policy_verdict</td><td>sub_synth_27</td><td><code>3def0e8bc4c6…</code></td></tr><tr><td>145</td><td>action_executed</td><td>sub_synth_27</td><td><code>5954c24e3a22…</code></td></tr><tr><td>146</td><td>event_received</td><td>sub_synth_27</td><td><code>03d4d1eff659…</code></td></tr><tr><td>147</td><td>duplicate_rejected</td><td>sub_synth_27</td><td><code>71833ac53ed0…</code></td></tr><tr><td>148</td><td>event_received</td><td>sub_synth_28</td><td><code>a0e596b36e08…</code></td></tr><tr><td>149</td><td>classified</td><td>sub_synth_28</td><td><code>798fbd96b8cb…</code></td></tr><tr><td>150</td><td>action_proposed</td><td>sub_synth_28</td><td><code>cf435b58b172…</code></td></tr><tr><td>151</td><td>policy_verdict</td><td>sub_synth_28</td><td><code>daf952ad91b9…</code></td></tr><tr><td>152</td><td>action_executed</td><td>sub_synth_28</td><td><code>e523484d27f3…</code></td></tr><tr><td>153</td><td>event_received</td><td>sub_synth_29</td><td><code>82d116dd439e…</code></td></tr><tr><td>154</td><td>classified</td><td>sub_synth_29</td><td><code>16ed751cfb8a…</code></td></tr><tr><td>155</td><td>action_proposed</td><td>sub_synth_29</td><td><code>335714f3ecdf…</code></td></tr><tr><td>156</td><td>policy_verdict</td><td>sub_synth_29</td><td><code>5f59113d4319…</code></td></tr><tr><td>157</td><td>action_executed</td><td>sub_synth_29</td><td><code>1deb9a8c21d4…</code></td></tr><tr><td>158</td><td>event_received</td><td>sub_synth_29</td><td><code>4fc9752a8c82…</code></td></tr><tr><td>159</td><td>duplicate_rejected</td><td>sub_synth_29</td><td><code>0b9e09214b22…</code></td></tr><tr><td>160</td><td>event_received</td><td>sub_synth_30</td><td><code>4bc41ecd0d23…</code></td></tr><tr><td>161</td><td>classified</td><td>sub_synth_30</td><td><code>5be67a2419d1…</code></td></tr><tr><td>162</td><td>action_proposed</td><td>sub_synth_30</td><td><code>10257910f4d8…</code></td></tr><tr><td>163</td><td>policy_verdict</td><td>sub_synth_30</td><td><code>8e3c7e73473d…</code></td></tr><tr><td>164</td><td>action_executed</td><td>sub_synth_30</td><td><code>fe1882c629c1…</code></td></tr><tr><td>165</td><td>event_received</td><td>sub_synth_31</td><td><code>538a036990ff…</code></td></tr><tr><td>166</td><td>classified</td><td>sub_synth_31</td><td><code>10366f61ea80…</code></td></tr><tr><td>167</td><td>action_proposed</td><td>sub_synth_31</td><td><code>9526985a730a…</code></td></tr><tr><td>168</td><td>policy_verdict</td><td>sub_synth_31</td><td><code>3132c53ae5dd…</code></td></tr><tr><td>169</td><td>action_executed</td><td>sub_synth_31</td><td><code>799a6d93326f…</code></td></tr><tr><td>170</td><td>event_received</td><td>sub_synth_32</td><td><code>a3e39eb2f604…</code></td></tr><tr><td>171</td><td>classified</td><td>sub_synth_32</td><td><code>f9725a8c02a8…</code></td></tr><tr><td>172</td><td>action_proposed</td><td>sub_synth_32</td><td><code>eeb8c515d1c9…</code></td></tr><tr><td>173</td><td>policy_verdict</td><td>sub_synth_32</td><td><code>1bdb05bc6c80…</code></td></tr><tr><td>174</td><td>action_executed</td><td>sub_synth_32</td><td><code>3fcb9ad0f0ef…</code></td></tr><tr><td>175</td><td>event_received</td><td>sub_synth_33</td><td><code>778973fac435…</code></td></tr><tr><td>176</td><td>classified</td><td>sub_synth_33</td><td><code>2dae6e48b08d…</code></td></tr><tr><td>177</td><td>action_proposed</td><td>sub_synth_33</td><td><code>c22416f2e943…</code></td></tr><tr><td>178</td><td>policy_verdict</td><td>sub_synth_33</td><td><code>bd47ff657e0a…</code></td></tr><tr><td>179</td><td>action_executed</td><td>sub_synth_33</td><td><code>b8d13ad4d56d…</code></td></tr><tr><td>180</td><td>event_received</td><td>sub_synth_34</td><td><code>6b3297916b12…</code></td></tr><tr><td>181</td><td>classified</td><td>sub_synth_34</td><td><code>b5fcd53922f2…</code></td></tr><tr><td>182</td><td>action_proposed</td><td>sub_synth_34</td><td><code>5d40f2cf4614…</code></td></tr><tr><td>183</td><td>policy_verdict</td><td>sub_synth_34</td><td><code>f75d6064c19f…</code></td></tr><tr><td>184</td><td>action_blocked</td><td>sub_synth_34</td><td><code>d8aff78fa889…</code></td></tr><tr><td>185</td><td>event_received</td><td>sub_synth_35</td><td><code>97f602f6ef57…</code></td></tr><tr><td>186</td><td>classified</td><td>sub_synth_35</td><td><code>06dec0313eac…</code></td></tr><tr><td>187</td><td>action_proposed</td><td>sub_synth_35</td><td><code>63cabdd4256e…</code></td></tr><tr><td>188</td><td>policy_verdict</td><td>sub_synth_35</td><td><code>9dc091d0b335…</code></td></tr><tr><td>189</td><td>action_executed</td><td>sub_synth_35</td><td><code>cdf9aea22b78…</code></td></tr><tr><td>190</td><td>event_received</td><td>sub_synth_36</td><td><code>0f72b0076a84…</code></td></tr><tr><td>191</td><td>classified</td><td>sub_synth_36</td><td><code>78c10456a30b…</code></td></tr><tr><td>192</td><td>action_proposed</td><td>sub_synth_36</td><td><code>452a1e366259…</code></td></tr><tr><td>193</td><td>policy_verdict</td><td>sub_synth_36</td><td><code>3a717bb36d82…</code></td></tr><tr><td>194</td><td>action_executed</td><td>sub_synth_36</td><td><code>aacca680d98d…</code></td></tr><tr><td>195</td><td>event_received</td><td>sub_synth_37</td><td><code>195bfdb6e5d7…</code></td></tr><tr><td>196</td><td>classified</td><td>sub_synth_37</td><td><code>688d855daa36…</code></td></tr><tr><td>197</td><td>action_proposed</td><td>sub_synth_37</td><td><code>0c299aeae817…</code></td></tr><tr><td>198</td><td>policy_verdict</td><td>sub_synth_37</td><td><code>08b0e6d226d9…</code></td></tr><tr><td>199</td><td>action_executed</td><td>sub_synth_37</td><td><code>fc0dc9eceb54…</code></td></tr><tr><td>200</td><td>event_received</td><td>sub_synth_38</td><td><code>c7b71658106c…</code></td></tr><tr><td>201</td><td>classified</td><td>sub_synth_38</td><td><code>c2d7ce8c0032…</code></td></tr><tr><td>202</td><td>action_proposed</td><td>sub_synth_38</td><td><code>1a0fd61803dd…</code></td></tr><tr><td>203</td><td>policy_verdict</td><td>sub_synth_38</td><td><code>65468c2118d3…</code></td></tr><tr><td>204</td><td>action_executed</td><td>sub_synth_38</td><td><code>57c3de2d8c93…</code></td></tr><tr><td>205</td><td>event_received</td><td>sub_synth_39</td><td><code>9e1a09379f59…</code></td></tr><tr><td>206</td><td>classified</td><td>sub_synth_39</td><td><code>52975f4335c4…</code></td></tr><tr><td>207</td><td>action_proposed</td><td>sub_synth_39</td><td><code>2c7705f2a791…</code></td></tr><tr><td>208</td><td>policy_verdict</td><td>sub_synth_39</td><td><code>f61446782daa…</code></td></tr><tr><td>209</td><td>action_executed</td><td>sub_synth_39</td><td><code>3d092f550a16…</code></td></tr><tr><td>210</td><td>event_received</td><td>sub_synth_40</td><td><code>a37160f1f80a…</code></td></tr><tr><td>211</td><td>classified</td><td>sub_synth_40</td><td><code>717b611694c4…</code></td></tr><tr><td>212</td><td>action_proposed</td><td>sub_synth_40</td><td><code>6c47b5046fc4…</code></td></tr><tr><td>213</td><td>policy_verdict</td><td>sub_synth_40</td><td><code>228d3ecc678a…</code></td></tr><tr><td>214</td><td>action_executed</td><td>sub_synth_40</td><td><code>c45968c5669d…</code></td></tr><tr><td>215</td><td>event_received</td><td>sub_synth_41</td><td><code>cae96d905e11…</code></td></tr><tr><td>216</td><td>classified</td><td>sub_synth_41</td><td><code>0ec99c7b27d0…</code></td></tr><tr><td>217</td><td>action_proposed</td><td>sub_synth_41</td><td><code>aee8904ae18c…</code></td></tr><tr><td>218</td><td>policy_verdict</td><td>sub_synth_41</td><td><code>5bcd3d0c2ab5…</code></td></tr><tr><td>219</td><td>action_executed</td><td>sub_synth_41</td><td><code>1d1c9dd4f75f…</code></td></tr><tr><td>220</td><td>event_received</td><td>sub_synth_42</td><td><code>c03c743c213c…</code></td></tr><tr><td>221</td><td>classified</td><td>sub_synth_42</td><td><code>8facd9a3c21c…</code></td></tr><tr><td>222</td><td>action_proposed</td><td>sub_synth_42</td><td><code>538bacb47a2b…</code></td></tr><tr><td>223</td><td>policy_verdict</td><td>sub_synth_42</td><td><code>2ec87a67014c…</code></td></tr><tr><td>224</td><td>action_executed</td><td>sub_synth_42</td><td><code>5ed0f3258f07…</code></td></tr><tr><td>225</td><td>event_received</td><td>sub_synth_43</td><td><code>87bb09ee8c64…</code></td></tr><tr><td>226</td><td>classified</td><td>sub_synth_43</td><td><code>e8b3a0f0d0d0…</code></td></tr><tr><td>227</td><td>action_proposed</td><td>sub_synth_43</td><td><code>b833ea42d603…</code></td></tr><tr><td>228</td><td>policy_verdict</td><td>sub_synth_43</td><td><code>c20ebc7fa113…</code></td></tr><tr><td>229</td><td>action_executed</td><td>sub_synth_43</td><td><code>3ba383674822…</code></td></tr><tr><td>230</td><td>event_received</td><td>sub_synth_44</td><td><code>9d69db6312fb…</code></td></tr><tr><td>231</td><td>classified</td><td>sub_synth_44</td><td><code>de60c06456af…</code></td></tr><tr><td>232</td><td>action_proposed</td><td>sub_synth_44</td><td><code>5f383cb4e9e8…</code></td></tr><tr><td>233</td><td>policy_verdict</td><td>sub_synth_44</td><td><code>6187b00b74d5…</code></td></tr><tr><td>234</td><td>action_executed</td><td>sub_synth_44</td><td><code>778169c21978…</code></td></tr><tr><td>235</td><td>event_received</td><td>sub_synth_45</td><td><code>39d05f158097…</code></td></tr><tr><td>236</td><td>classified</td><td>sub_synth_45</td><td><code>83f3bb3966db…</code></td></tr><tr><td>237</td><td>action_proposed</td><td>sub_synth_45</td><td><code>ec7e785f9e4d…</code></td></tr><tr><td>238</td><td>policy_verdict</td><td>sub_synth_45</td><td><code>282f7b7e272c…</code></td></tr><tr><td>239</td><td>action_blocked</td><td>sub_synth_45</td><td><code>296be13f5266…</code></td></tr><tr><td>240</td><td>event_received</td><td>sub_synth_46</td><td><code>4bd83d716389…</code></td></tr><tr><td>241</td><td>classified</td><td>sub_synth_46</td><td><code>ae1f987631de…</code></td></tr><tr><td>242</td><td>action_proposed</td><td>sub_synth_46</td><td><code>07e3ec392401…</code></td></tr><tr><td>243</td><td>policy_verdict</td><td>sub_synth_46</td><td><code>cbba14ade284…</code></td></tr><tr><td>244</td><td>action_executed</td><td>sub_synth_46</td><td><code>56bd11e69b12…</code></td></tr><tr><td>245</td><td>event_received</td><td>sub_synth_47</td><td><code>10460d25f101…</code></td></tr><tr><td>246</td><td>classified</td><td>sub_synth_47</td><td><code>e9d7976c3608…</code></td></tr><tr><td>247</td><td>action_proposed</td><td>sub_synth_47</td><td><code>eaa150496203…</code></td></tr><tr><td>248</td><td>policy_verdict</td><td>sub_synth_47</td><td><code>3e7fb819180a…</code></td></tr><tr><td>249</td><td>action_executed</td><td>sub_synth_47</td><td><code>054d5b4fb6ad…</code></td></tr><tr><td>250</td><td>event_received</td><td>sub_synth_48</td><td><code>bada5d524cff…</code></td></tr><tr><td>251</td><td>classified</td><td>sub_synth_48</td><td><code>5c6c8abf0294…</code></td></tr><tr><td>252</td><td>action_proposed</td><td>sub_synth_48</td><td><code>7eeda3b21360…</code></td></tr><tr><td>253</td><td>policy_verdict</td><td>sub_synth_48</td><td><code>fba95825016f…</code></td></tr><tr><td>254</td><td>action_blocked</td><td>sub_synth_48</td><td><code>06e8445fb7d4…</code></td></tr><tr><td>255</td><td>event_received</td><td>sub_synth_49</td><td><code>7e7c831b41d7…</code></td></tr><tr><td>256</td><td>classified</td><td>sub_synth_49</td><td><code>ef4558f7d876…</code></td></tr><tr><td>257</td><td>action_proposed</td><td>sub_synth_49</td><td><code>5620028c0a4c…</code></td></tr><tr><td>258</td><td>policy_verdict</td><td>sub_synth_49</td><td><code>6fed02a3e7c3…</code></td></tr><tr><td>259</td><td>action_executed</td><td>sub_synth_49</td><td><code>074bf86ff7d2…</code></td></tr><tr><td>260</td><td>event_received</td><td>sub_synth_50</td><td><code>6f37f0e09d96…</code></td></tr><tr><td>261</td><td>classified</td><td>sub_synth_50</td><td><code>5b8707b9f246…</code></td></tr><tr><td>262</td><td>action_proposed</td><td>sub_synth_50</td><td><code>33a746641141…</code></td></tr><tr><td>263</td><td>policy_verdict</td><td>sub_synth_50</td><td><code>6f2d30848e1e…</code></td></tr><tr><td>264</td><td>action_executed</td><td>sub_synth_50</td><td><code>2b84c22e0061…</code></td></tr><tr><td>265</td><td>event_received</td><td>sub_synth_51</td><td><code>1c1c1d09f2a4…</code></td></tr><tr><td>266</td><td>classified</td><td>sub_synth_51</td><td><code>f54a4a85ac1f…</code></td></tr><tr><td>267</td><td>action_proposed</td><td>sub_synth_51</td><td><code>5a2cdcb866fb…</code></td></tr><tr><td>268</td><td>policy_verdict</td><td>sub_synth_51</td><td><code>446df529ca05…</code></td></tr><tr><td>269</td><td>action_executed</td><td>sub_synth_51</td><td><code>32b3caaf95c0…</code></td></tr><tr><td>270</td><td>event_received</td><td>sub_synth_52</td><td><code>d14bfd28d547…</code></td></tr><tr><td>271</td><td>classified</td><td>sub_synth_52</td><td><code>185094ce109d…</code></td></tr><tr><td>272</td><td>action_proposed</td><td>sub_synth_52</td><td><code>a7cbdeb0ed37…</code></td></tr><tr><td>273</td><td>policy_verdict</td><td>sub_synth_52</td><td><code>5a3906165dfb…</code></td></tr><tr><td>274</td><td>action_executed</td><td>sub_synth_52</td><td><code>988099760ea3…</code></td></tr><tr><td>275</td><td>event_received</td><td>sub_synth_53</td><td><code>a59800ae88e5…</code></td></tr><tr><td>276</td><td>classified</td><td>sub_synth_53</td><td><code>6bd0212c019d…</code></td></tr><tr><td>277</td><td>action_proposed</td><td>sub_synth_53</td><td><code>87a18f08650c…</code></td></tr><tr><td>278</td><td>policy_verdict</td><td>sub_synth_53</td><td><code>63a22e94cb29…</code></td></tr><tr><td>279</td><td>action_executed</td><td>sub_synth_53</td><td><code>48d3b6c04ed9…</code></td></tr><tr><td>280</td><td>event_received</td><td>sub_synth_54</td><td><code>74cb0ac94a5a…</code></td></tr><tr><td>281</td><td>classified</td><td>sub_synth_54</td><td><code>569ad9cf844f…</code></td></tr><tr><td>282</td><td>action_proposed</td><td>sub_synth_54</td><td><code>485b947a335f…</code></td></tr><tr><td>283</td><td>policy_verdict</td><td>sub_synth_54</td><td><code>a32fa52feb52…</code></td></tr><tr><td>284</td><td>action_executed</td><td>sub_synth_54</td><td><code>e98c6b5dadf5…</code></td></tr><tr><td>285</td><td>event_received</td><td>sub_synth_55</td><td><code>a62f9b93defb…</code></td></tr><tr><td>286</td><td>classified</td><td>sub_synth_55</td><td><code>a0f29fad609c…</code></td></tr><tr><td>287</td><td>action_proposed</td><td>sub_synth_55</td><td><code>3087c41e4dc7…</code></td></tr><tr><td>288</td><td>policy_verdict</td><td>sub_synth_55</td><td><code>785f4ee97d54…</code></td></tr><tr><td>289</td><td>action_executed</td><td>sub_synth_55</td><td><code>7daae1dee34f…</code></td></tr><tr><td>290</td><td>event_received</td><td>sub_synth_56</td><td><code>9d22159d2ae9…</code></td></tr><tr><td>291</td><td>classified</td><td>sub_synth_56</td><td><code>772ee18f5eb1…</code></td></tr><tr><td>292</td><td>action_proposed</td><td>sub_synth_56</td><td><code>c72ac85f269c…</code></td></tr><tr><td>293</td><td>policy_verdict</td><td>sub_synth_56</td><td><code>4fa01e2ea828…</code></td></tr><tr><td>294</td><td>action_executed</td><td>sub_synth_56</td><td><code>6ec5b3a68d2b…</code></td></tr><tr><td>295</td><td>event_received</td><td>sub_synth_57</td><td><code>1a402bf87c8b…</code></td></tr><tr><td>296</td><td>classified</td><td>sub_synth_57</td><td><code>442d1dd2b71a…</code></td></tr><tr><td>297</td><td>action_proposed</td><td>sub_synth_57</td><td><code>e6dbe38438e9…</code></td></tr><tr><td>298</td><td>policy_verdict</td><td>sub_synth_57</td><td><code>b98ee69d30ae…</code></td></tr><tr><td>299</td><td>action_executed</td><td>sub_synth_57</td><td><code>ce292cb82b8f…</code></td></tr><tr><td>300</td><td>event_received</td><td>sub_synth_58</td><td><code>667a693d1123…</code></td></tr><tr><td>301</td><td>classified</td><td>sub_synth_58</td><td><code>6ac5db962b46…</code></td></tr><tr><td>302</td><td>action_proposed</td><td>sub_synth_58</td><td><code>2d59dd0cf467…</code></td></tr><tr><td>303</td><td>policy_verdict</td><td>sub_synth_58</td><td><code>d6d49d5d8262…</code></td></tr><tr><td>304</td><td>action_executed</td><td>sub_synth_58</td><td><code>e18f4fc89b2b…</code></td></tr><tr><td>305</td><td>event_received</td><td>sub_synth_59</td><td><code>bcae64832518…</code></td></tr><tr><td>306</td><td>classified</td><td>sub_synth_59</td><td><code>d48e7de0efd8…</code></td></tr><tr><td>307</td><td>action_proposed</td><td>sub_synth_59</td><td><code>07a2c4da9f09…</code></td></tr><tr><td>308</td><td>policy_verdict</td><td>sub_synth_59</td><td><code>36e2a6d8342e…</code></td></tr><tr><td>309</td><td>action_executed</td><td>sub_synth_59</td><td><code>9fd0ef6079e9…</code></td></tr></table>
-</section>
-<section>
-  <h2>Where AI was and was not used</h2>
-  <p>Documented-field classification: rules only. Ambiguous-text classification: LLM, with confidence + abstain.
-     Choosing and authorising every action: deterministic code only. Nudge text: LLM (or static template offline), logged, never sent.</p>
-</section>
+<div class="wrap">
+
+  <div class="case-head">
+    <div>
+      <h1>Rebound <span class="dim-part">— Batch Audit Report</span></h1>
+    </div>
+    <div class="case-meta">
+      <div class="case-no">CASE No. EADD3E2E</div>
+      <div>Razorpay AI Buildathon &middot; Track 3</div>
+      <div>60 scenarios &middot; 310 ledger entries</div>
+    </div>
+  </div>
+
+  <section class="exhibit">
+  <span class="tick tl"></span><span class="tick tr"></span><span class="tick bl"></span><span class="tick br"></span>
+  <header class="exhibit-head"><span class="exhibit-tag">EXHIBIT A</span><h2>The Verdict</h2></header>
+  <div class="exhibit-body">
+    <div class="verdict-strip"><div class="verdict-item ok">
+  <div class="verdict-id">A1</div>
+  <div class="verdict-value">00</div>
+  <div class="verdict-label">Double charges</div>
+  <div class="verdict-stamp">CLEAR</div>
+</div><div class="verdict-item ok">
+  <div class="verdict-id">A2</div>
+  <div class="verdict-value">00</div>
+  <div class="verdict-label">Policy violations</div>
+  <div class="verdict-stamp">CLEAR</div>
+</div><div class="verdict-item ok">
+  <div class="verdict-id">A3</div>
+  <div class="verdict-value">00</div>
+  <div class="verdict-label">False escalations</div>
+  <div class="verdict-stamp">CLEAR</div>
+</div></div>
+    <p class="verdict-footnote"><b>5</b> duplicate webhook redeliveries were injected on purpose during this run and rejected before reaching any classifier or executor — see Exhibit E.</p>
+  </div></section>
+
+  <section class="exhibit">
+  <span class="tick tl"></span><span class="tick tr"></span><span class="tick bl"></span><span class="tick br"></span>
+  <header class="exhibit-head"><span class="exhibit-tag">EXHIBIT B</span><h2>Disposition by Cause</h2></header>
+  <div class="exhibit-body">
+    <table>
+      <thead><tr><th>Cause</th><th class="num">Allowed</th><th class="num">Blocked</th><th class="num">Escalated</th><th class="num">Total</th></tr></thead>
+      <tbody><tr data-cause="bank_or_gateway_error">
+  <td class="mono cause-name" title="bank_or_gateway_error">Bank / gateway error</td>
+  <td class="num"><span class="chip ok">12</span></td>
+  <td class="num"><span class="chip bad">0</span></td>
+  <td class="num"><span class="chip warn">0</span></td>
+  <td class="num mono dim">12</td>
+</tr><tr data-cause="insufficient_funds">
+  <td class="mono cause-name" title="insufficient_funds">Insufficient funds</td>
+  <td class="num"><span class="chip ok">21</span></td>
+  <td class="num"><span class="chip bad">0</span></td>
+  <td class="num"><span class="chip warn">0</span></td>
+  <td class="num mono dim">21</td>
+</tr><tr data-cause="instrument_expired_or_blocked">
+  <td class="mono cause-name" title="instrument_expired_or_blocked">Instrument expired / blocked</td>
+  <td class="num"><span class="chip ok">6</span></td>
+  <td class="num"><span class="chip bad">0</span></td>
+  <td class="num"><span class="chip warn">0</span></td>
+  <td class="num mono dim">6</td>
+</tr><tr data-cause="mandate_not_active">
+  <td class="mono cause-name" title="mandate_not_active">Mandate not active</td>
+  <td class="num"><span class="chip ok">5</span></td>
+  <td class="num"><span class="chip bad">0</span></td>
+  <td class="num"><span class="chip warn">0</span></td>
+  <td class="num mono dim">5</td>
+</tr><tr data-cause="unknown">
+  <td class="mono cause-name" title="unknown">Unknown (ambiguous)</td>
+  <td class="num"><span class="chip ok">0</span></td>
+  <td class="num"><span class="chip bad">0</span></td>
+  <td class="num"><span class="chip warn">4</span></td>
+  <td class="num mono dim">4</td>
+</tr><tr data-cause="authentication_failed">
+  <td class="mono cause-name" title="authentication_failed">Authentication failed</td>
+  <td class="num"><span class="chip ok">9</span></td>
+  <td class="num"><span class="chip bad">0</span></td>
+  <td class="num"><span class="chip warn">0</span></td>
+  <td class="num mono dim">9</td>
+</tr><tr data-cause="limit_exceeded">
+  <td class="mono cause-name" title="limit_exceeded">Limit exceeded</td>
+  <td class="num"><span class="chip ok">3</span></td>
+  <td class="num"><span class="chip bad">0</span></td>
+  <td class="num"><span class="chip warn">0</span></td>
+  <td class="num mono dim">3</td>
+</tr></tbody>
+    </table>
+  </div></section>
+
+  <section class="exhibit">
+  <span class="tick tl"></span><span class="tick tr"></span><span class="tick bl"></span><span class="tick br"></span>
+  <header class="exhibit-head"><span class="exhibit-tag">EXHIBIT C</span><h2>Classifier Findings</h2></header>
+  <div class="exhibit-body">
+    <div class="stat-row">
+      <div class="stat"><div class="n">100%</div><div class="l">Accuracy &middot; held-out (n=20)</div></div>
+      <div class="stat"><div class="n">5%</div><div class="l">Abstain rate</div></div>
+    </div>
+    <table>
+      <thead><tr><th>Cause</th><th class="num">Precision</th><th class="num">Recall</th></tr></thead>
+      <tbody><tr>
+  <td class="mono cause-name">Authentication failed</td>
+  <td class="num mono">1.00</td>
+  <td class="num mono">1.00</td>
+</tr><tr>
+  <td class="mono cause-name">Bank / gateway error</td>
+  <td class="num mono">1.00</td>
+  <td class="num mono">1.00</td>
+</tr><tr>
+  <td class="mono cause-name">Instrument expired / blocked</td>
+  <td class="num mono">1.00</td>
+  <td class="num mono">1.00</td>
+</tr><tr>
+  <td class="mono cause-name">Insufficient funds</td>
+  <td class="num mono">1.00</td>
+  <td class="num mono">1.00</td>
+</tr><tr>
+  <td class="mono cause-name">Limit exceeded</td>
+  <td class="num mono">1.00</td>
+  <td class="num mono">1.00</td>
+</tr><tr>
+  <td class="mono cause-name">Unknown (ambiguous)</td>
+  <td class="num mono">1.00</td>
+  <td class="num mono">1.00</td>
+</tr></tbody>
+    </table>
+    <div class="confusion">
+      <div class="confusion-label">Confusion matrix &middot; truth &rarr; predicted</div>
+      <div class="confusion-row"><span class="mono">authentication_failed</span><span class="arrow">&rarr;</span><span class="mono">authentication_failed</span><span class="chip dim">&times;2</span></div><div class="confusion-row"><span class="mono">bank_or_gateway_error</span><span class="arrow">&rarr;</span><span class="mono">bank_or_gateway_error</span><span class="chip dim">&times;5</span></div><div class="confusion-row"><span class="mono">instrument_expired_or_blocked</span><span class="arrow">&rarr;</span><span class="mono">instrument_expired_or_blocked</span><span class="chip dim">&times;2</span></div><div class="confusion-row"><span class="mono">insufficient_funds</span><span class="arrow">&rarr;</span><span class="mono">insufficient_funds</span><span class="chip dim">&times;8</span></div><div class="confusion-row"><span class="mono">limit_exceeded</span><span class="arrow">&rarr;</span><span class="mono">limit_exceeded</span><span class="chip dim">&times;2</span></div><div class="confusion-row"><span class="mono">unknown</span><span class="arrow">&rarr;</span><span class="mono">unknown</span><span class="chip dim">&times;1</span></div>
+    </div>
+  </div></section>
+
+  <section class="exhibit">
+  <span class="tick tl"></span><span class="tick tr"></span><span class="tick bl"></span><span class="tick br"></span>
+  <header class="exhibit-head"><span class="exhibit-tag">EXHIBIT D</span><h2>Chain of Evidence</h2></header>
+  <div class="exhibit-body">
+    <div class="citation-row">
+  <span class="mono citation-id">scn_0</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Bank / gateway error</span>
+  <span class="citation-source">error_reason=bank_technical_error</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_1</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Insufficient funds</span>
+  <span class="citation-source">error_reason=insufficient_funds</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_2</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Bank / gateway error</span>
+  <span class="citation-source">error_reason=bank_technical_error</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_3</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Insufficient funds</span>
+  <span class="citation-source">error_reason=insufficient_funds</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_4</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Insufficient funds</span>
+  <span class="citation-source">error_reason=insufficient_funds</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_5</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Bank / gateway error</span>
+  <span class="citation-source">error_reason=bank_technical_error</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_6</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Instrument expired / blocked</span>
+  <span class="citation-source">error_reason=card_expired</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_7</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Mandate not active</span>
+  <span class="citation-source">token_status=paused</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_8</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Instrument expired / blocked</span>
+  <span class="citation-source">error_reason=card_expired</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_10</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Insufficient funds</span>
+  <span class="citation-source">error_reason=insufficient_funds</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_11</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Mandate not active</span>
+  <span class="citation-source">token_status=paused</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_12</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Bank / gateway error</span>
+  <span class="citation-source">error_reason=bank_technical_error</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_13</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Insufficient funds</span>
+  <span class="citation-source">error_reason=insufficient_funds</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_14</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Authentication failed</span>
+  <span class="citation-source">error_reason=authentication_failed</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_15</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Bank / gateway error</span>
+  <span class="citation-source">error_reason=bank_technical_error</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_16</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Limit exceeded</span>
+  <span class="citation-source">error_reason=transaction_limit_exceeded</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_17</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Insufficient funds</span>
+  <span class="citation-source">error_reason=insufficient_funds</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_18</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Instrument expired / blocked</span>
+  <span class="citation-source">error_reason=card_expired</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_19</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Bank / gateway error</span>
+  <span class="citation-source">error_reason=bank_technical_error</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_20</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Authentication failed</span>
+  <span class="citation-source">error_reason=authentication_failed</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_21</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Authentication failed</span>
+  <span class="citation-source">error_reason=authentication_failed</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_22</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Bank / gateway error</span>
+  <span class="citation-source">error_reason=bank_technical_error</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_23</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Mandate not active</span>
+  <span class="citation-source">token_status=paused</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_24</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Insufficient funds</span>
+  <span class="citation-source">error_reason=insufficient_funds</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_25</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Insufficient funds</span>
+  <span class="citation-source">error_reason=insufficient_funds</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_26</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Limit exceeded</span>
+  <span class="citation-source">error_reason=transaction_limit_exceeded</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_27</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Insufficient funds</span>
+  <span class="citation-source">error_reason=insufficient_funds</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_28</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Bank / gateway error</span>
+  <span class="citation-source">error_reason=bank_technical_error</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_29</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Instrument expired / blocked</span>
+  <span class="citation-source">error_reason=card_expired</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_30</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Insufficient funds</span>
+  <span class="citation-source">error_reason=insufficient_funds</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_31</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Insufficient funds</span>
+  <span class="citation-source">error_reason=insufficient_funds</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_32</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Authentication failed</span>
+  <span class="citation-source">error_reason=authentication_failed</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_33</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Authentication failed</span>
+  <span class="citation-source">error_reason=authentication_failed</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_35</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Bank / gateway error</span>
+  <span class="citation-source">error_reason=bank_technical_error</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_36</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Insufficient funds</span>
+  <span class="citation-source">error_reason=insufficient_funds</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_37</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Authentication failed</span>
+  <span class="citation-source">error_reason=authentication_failed</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_38</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Authentication failed</span>
+  <span class="citation-source">error_reason=authentication_failed</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_39</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Mandate not active</span>
+  <span class="citation-source">token_status=paused</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_40</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Instrument expired / blocked</span>
+  <span class="citation-source">error_reason=card_expired</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_41</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Authentication failed</span>
+  <span class="citation-source">error_reason=authentication_failed</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_42</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Insufficient funds</span>
+  <span class="citation-source">error_reason=insufficient_funds</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_43</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Insufficient funds</span>
+  <span class="citation-source">error_reason=insufficient_funds</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_44</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Insufficient funds</span>
+  <span class="citation-source">error_reason=insufficient_funds</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_46</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Bank / gateway error</span>
+  <span class="citation-source">error_reason=bank_technical_error</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_47</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Authentication failed</span>
+  <span class="citation-source">error_reason=authentication_failed</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_49</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Instrument expired / blocked</span>
+  <span class="citation-source">error_reason=card_expired</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_50</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Limit exceeded</span>
+  <span class="citation-source">error_reason=transaction_limit_exceeded</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_51</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Insufficient funds</span>
+  <span class="citation-source">error_reason=insufficient_funds</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_52</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Insufficient funds</span>
+  <span class="citation-source">error_reason=insufficient_funds</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_53</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Insufficient funds</span>
+  <span class="citation-source">error_reason=insufficient_funds</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_54</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Insufficient funds</span>
+  <span class="citation-source">error_reason=insufficient_funds</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_55</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Insufficient funds</span>
+  <span class="citation-source">error_reason=insufficient_funds</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_56</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Bank / gateway error</span>
+  <span class="citation-source">error_reason=bank_technical_error</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_57</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Bank / gateway error</span>
+  <span class="citation-source">error_reason=bank_technical_error</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_58</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Mandate not active</span>
+  <span class="citation-source">token_status=paused</span>
+</div><div class="citation-row">
+  <span class="mono citation-id">scn_59</span>
+  <span class="arrow">&rarr;</span>
+  <span class="mono">Insufficient funds</span>
+  <span class="citation-source">error_reason=insufficient_funds</span>
+</div>
+    <p class="ledger-note">Every non-<code class="mono">unknown</code> classification above is traced to the documented Razorpay field it was read from — never a label the model invented.</p>
+  </div></section>
+
+  <section class="exhibit">
+  <span class="tick tl"></span><span class="tick tr"></span><span class="tick bl"></span><span class="tick br"></span>
+  <header class="exhibit-head"><span class="exhibit-tag">EXHIBIT E</span><h2>Custody Ledger</h2></header>
+  <div class="exhibit-body">
+    <div class="ledger-scroll"><div class="ledger-row">
+  <span class="mono ledger-seq">0000</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_0</span>
+  <span class="mono ledger-hash">5c09e4fa020c2a56&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0001</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_0</span>
+  <span class="mono ledger-hash">bca783f7ae835531&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0002</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_0</span>
+  <span class="mono ledger-hash">1b28b421cc9607e6&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0003</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_0</span>
+  <span class="mono ledger-hash">25f8b5f73b6e6ee7&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0004</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_0</span>
+  <span class="mono ledger-hash">9c4f82a3dbf28ddc&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0005</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_1</span>
+  <span class="mono ledger-hash">7c1b51239c2e0270&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0006</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_1</span>
+  <span class="mono ledger-hash">da6f0ab5992c2317&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0007</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_1</span>
+  <span class="mono ledger-hash">3c637e490a8ad163&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0008</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_1</span>
+  <span class="mono ledger-hash">287c327035dc289d&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0009</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_1</span>
+  <span class="mono ledger-hash">b8a91356689df9d5&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0010</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_2</span>
+  <span class="mono ledger-hash">284db260ea2e1c48&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0011</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_2</span>
+  <span class="mono ledger-hash">514f2af1680bd546&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0012</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_2</span>
+  <span class="mono ledger-hash">ef5c8188d4f56541&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0013</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_2</span>
+  <span class="mono ledger-hash">1fe3bb6e0c9c6fbe&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0014</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_2</span>
+  <span class="mono ledger-hash">336521b87c2f38c0&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0015</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_3</span>
+  <span class="mono ledger-hash">4bc2dac9ed05f93e&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0016</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_3</span>
+  <span class="mono ledger-hash">2b7e0aead8158789&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0017</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_3</span>
+  <span class="mono ledger-hash">87202176402189b4&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0018</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_3</span>
+  <span class="mono ledger-hash">12d09ea6666695bc&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0019</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_3</span>
+  <span class="mono ledger-hash">b83f6232332d86b5&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0020</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_4</span>
+  <span class="mono ledger-hash">0ab8b32db3388f07&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0021</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_4</span>
+  <span class="mono ledger-hash">e02d2273eae53534&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0022</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_4</span>
+  <span class="mono ledger-hash">aac6ee1d17ef92e7&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0023</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_4</span>
+  <span class="mono ledger-hash">97d91bd4470b34f0&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0024</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_4</span>
+  <span class="mono ledger-hash">c321161bc94b57a3&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0025</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_5</span>
+  <span class="mono ledger-hash">a933302f7f3f7760&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0026</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_5</span>
+  <span class="mono ledger-hash">ebb4bc17a712162e&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0027</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_5</span>
+  <span class="mono ledger-hash">a7a8cf3421efce4a&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0028</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_5</span>
+  <span class="mono ledger-hash">06e2db6896948109&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0029</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_5</span>
+  <span class="mono ledger-hash">10cc57fed11a9296&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0030</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_6</span>
+  <span class="mono ledger-hash">946c968126cab217&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0031</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_6</span>
+  <span class="mono ledger-hash">778a9a0a348840b3&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0032</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_6</span>
+  <span class="mono ledger-hash">b903b0c4e8e71a47&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0033</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_6</span>
+  <span class="mono ledger-hash">936265919a1ad21f&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0034</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_6</span>
+  <span class="mono ledger-hash">13f4d1ccac582af2&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0035</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_7</span>
+  <span class="mono ledger-hash">384ced589ccade88&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0036</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_7</span>
+  <span class="mono ledger-hash">9ebc5cd969003aae&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0037</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_7</span>
+  <span class="mono ledger-hash">6af7a1d5c5c007bd&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0038</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_7</span>
+  <span class="mono ledger-hash">24083d2f767ab398&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0039</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_7</span>
+  <span class="mono ledger-hash">95b16550fd7e862a&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0040</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_8</span>
+  <span class="mono ledger-hash">bfd8170e57739105&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0041</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_8</span>
+  <span class="mono ledger-hash">1b9c912baa07180f&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0042</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_8</span>
+  <span class="mono ledger-hash">4b95d83d7e2bfe17&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0043</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_8</span>
+  <span class="mono ledger-hash">e5bed6eed049dc44&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0044</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_8</span>
+  <span class="mono ledger-hash">6fa4c2bd350eed90&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0045</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_8</span>
+  <span class="mono ledger-hash">11ee0f319684b1ed&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0046</span>
+  <span class="ledger-stage">duplicate_rejected</span>
+  <span class="mono ledger-sub dim">sub_synth_8</span>
+  <span class="mono ledger-hash">f4cd2847eb0e1e6e&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0047</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_9</span>
+  <span class="mono ledger-hash">1e9f84a333f814b4&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0048</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_9</span>
+  <span class="mono ledger-hash">9289f5121e429a0b&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0049</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_9</span>
+  <span class="mono ledger-hash">b4b49374810c9c4b&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0050</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_9</span>
+  <span class="mono ledger-hash">3376a93199320c29&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0051</span>
+  <span class="ledger-stage">action_blocked</span>
+  <span class="mono ledger-sub dim">sub_synth_9</span>
+  <span class="mono ledger-hash">aa525217e016f671&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0052</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_10</span>
+  <span class="mono ledger-hash">d0ed771faeb61cd9&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0053</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_10</span>
+  <span class="mono ledger-hash">a18875d4e8536ee0&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0054</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_10</span>
+  <span class="mono ledger-hash">2c639fc10c59583f&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0055</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_10</span>
+  <span class="mono ledger-hash">87a3d071884ec7e2&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0056</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_10</span>
+  <span class="mono ledger-hash">c4961e0886862ee5&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0057</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_11</span>
+  <span class="mono ledger-hash">82846e1682d2d377&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0058</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_11</span>
+  <span class="mono ledger-hash">f118cc58a2d526eb&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0059</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_11</span>
+  <span class="mono ledger-hash">31e4b7d0e7561c5e&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0060</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_11</span>
+  <span class="mono ledger-hash">ee87c09f42b009ee&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0061</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_11</span>
+  <span class="mono ledger-hash">716a384b87a53194&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0062</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_11</span>
+  <span class="mono ledger-hash">a46885ea11638ea8&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0063</span>
+  <span class="ledger-stage">duplicate_rejected</span>
+  <span class="mono ledger-sub dim">sub_synth_11</span>
+  <span class="mono ledger-hash">bba24c479df95377&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0064</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_12</span>
+  <span class="mono ledger-hash">109053787ea79516&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0065</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_12</span>
+  <span class="mono ledger-hash">5a7b2c87591730f7&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0066</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_12</span>
+  <span class="mono ledger-hash">9b2ea966c06ba92b&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0067</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_12</span>
+  <span class="mono ledger-hash">c18c8ec162022522&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0068</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_12</span>
+  <span class="mono ledger-hash">80733bf2de963e3a&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0069</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_13</span>
+  <span class="mono ledger-hash">91ff7299da848e13&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0070</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_13</span>
+  <span class="mono ledger-hash">e17ef732b58ba25b&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0071</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_13</span>
+  <span class="mono ledger-hash">6541d492f86c35b9&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0072</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_13</span>
+  <span class="mono ledger-hash">2cfb9fe8e358f754&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0073</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_13</span>
+  <span class="mono ledger-hash">6d5bf9a5fdd1e03a&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0074</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_14</span>
+  <span class="mono ledger-hash">b4445f2c7504d87c&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0075</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_14</span>
+  <span class="mono ledger-hash">aa58df7e757c3fc4&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0076</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_14</span>
+  <span class="mono ledger-hash">ee68c62c8a684411&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0077</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_14</span>
+  <span class="mono ledger-hash">b72174ce641695a5&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0078</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_14</span>
+  <span class="mono ledger-hash">fa7820b34d6b9e49&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0079</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_15</span>
+  <span class="mono ledger-hash">b195aa2b58423b4d&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0080</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_15</span>
+  <span class="mono ledger-hash">b0af442835c7e828&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0081</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_15</span>
+  <span class="mono ledger-hash">54cd31bf0adefa1c&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0082</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_15</span>
+  <span class="mono ledger-hash">771fd60251730898&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0083</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_15</span>
+  <span class="mono ledger-hash">0036d96a37f4d6e7&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0084</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_16</span>
+  <span class="mono ledger-hash">f0d424a0d6106d5f&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0085</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_16</span>
+  <span class="mono ledger-hash">2e407f8af76fcfe9&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0086</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_16</span>
+  <span class="mono ledger-hash">984e105668a7daf2&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0087</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_16</span>
+  <span class="mono ledger-hash">36dbaea5ea659547&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0088</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_16</span>
+  <span class="mono ledger-hash">ad1596b608aab816&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0089</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_17</span>
+  <span class="mono ledger-hash">183e44e420f923ac&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0090</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_17</span>
+  <span class="mono ledger-hash">656ce0c6249fd98a&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0091</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_17</span>
+  <span class="mono ledger-hash">af2161de9de2e958&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0092</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_17</span>
+  <span class="mono ledger-hash">ee343e865bfe7614&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0093</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_17</span>
+  <span class="mono ledger-hash">62ef1ba03366eec3&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0094</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_17</span>
+  <span class="mono ledger-hash">0915783a2b72cb29&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0095</span>
+  <span class="ledger-stage">duplicate_rejected</span>
+  <span class="mono ledger-sub dim">sub_synth_17</span>
+  <span class="mono ledger-hash">21ecc4ee2c9c3480&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0096</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_18</span>
+  <span class="mono ledger-hash">f881a57577c143cc&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0097</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_18</span>
+  <span class="mono ledger-hash">2002b11cf22a1fe5&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0098</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_18</span>
+  <span class="mono ledger-hash">20d94649eccf9a9c&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0099</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_18</span>
+  <span class="mono ledger-hash">1982a0746e85ffbc&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0100</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_18</span>
+  <span class="mono ledger-hash">f2622a1918626022&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0101</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_19</span>
+  <span class="mono ledger-hash">430d99277609cb5d&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0102</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_19</span>
+  <span class="mono ledger-hash">1ea1c18cda7720ce&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0103</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_19</span>
+  <span class="mono ledger-hash">67eaa5456e610457&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0104</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_19</span>
+  <span class="mono ledger-hash">fdfb2d57ed2bc582&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0105</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_19</span>
+  <span class="mono ledger-hash">673f6e8602ec211c&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0106</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_20</span>
+  <span class="mono ledger-hash">e83c0a5aa25496c0&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0107</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_20</span>
+  <span class="mono ledger-hash">83747bfc8cfb71b9&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0108</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_20</span>
+  <span class="mono ledger-hash">2af542ec6f5498c6&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0109</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_20</span>
+  <span class="mono ledger-hash">344b73beb2d1f2b5&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0110</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_20</span>
+  <span class="mono ledger-hash">ecaf9de32ad33603&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0111</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_21</span>
+  <span class="mono ledger-hash">d58da90b7c43bd66&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0112</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_21</span>
+  <span class="mono ledger-hash">480d19711cdffcce&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0113</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_21</span>
+  <span class="mono ledger-hash">d1fd9c2489263f49&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0114</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_21</span>
+  <span class="mono ledger-hash">ba324c36bcb64125&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0115</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_21</span>
+  <span class="mono ledger-hash">0a6a7c9d7245495a&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0116</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_22</span>
+  <span class="mono ledger-hash">e8cc9af847451831&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0117</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_22</span>
+  <span class="mono ledger-hash">616c0ffb3a8d2770&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0118</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_22</span>
+  <span class="mono ledger-hash">acb1619a25092b69&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0119</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_22</span>
+  <span class="mono ledger-hash">a7eaac82c1c744e6&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0120</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_22</span>
+  <span class="mono ledger-hash">c7fd284e9a9b8c72&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0121</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_23</span>
+  <span class="mono ledger-hash">23c0118e6298c5b5&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0122</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_23</span>
+  <span class="mono ledger-hash">b4c1ea706dca5140&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0123</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_23</span>
+  <span class="mono ledger-hash">9c364a6b39624993&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0124</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_23</span>
+  <span class="mono ledger-hash">8d389ae9d1149615&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0125</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_23</span>
+  <span class="mono ledger-hash">0cddf3a2664325c1&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0126</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_24</span>
+  <span class="mono ledger-hash">070a7a5239e6d570&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0127</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_24</span>
+  <span class="mono ledger-hash">b22d3f9db4c01d09&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0128</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_24</span>
+  <span class="mono ledger-hash">998745ed9de81341&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0129</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_24</span>
+  <span class="mono ledger-hash">a80b61fc68651cf1&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0130</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_24</span>
+  <span class="mono ledger-hash">400b2669542ffb93&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0131</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_25</span>
+  <span class="mono ledger-hash">df1c871f1f123401&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0132</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_25</span>
+  <span class="mono ledger-hash">30cd23d8f91979fd&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0133</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_25</span>
+  <span class="mono ledger-hash">01278fe4ccc83810&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0134</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_25</span>
+  <span class="mono ledger-hash">4637551d60776562&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0135</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_25</span>
+  <span class="mono ledger-hash">db3dc88161ac4b37&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0136</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_26</span>
+  <span class="mono ledger-hash">201ce510ca5cf472&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0137</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_26</span>
+  <span class="mono ledger-hash">d16ac78086cd0312&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0138</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_26</span>
+  <span class="mono ledger-hash">1235f0d19434fc6d&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0139</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_26</span>
+  <span class="mono ledger-hash">807be1eb071d2af5&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0140</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_26</span>
+  <span class="mono ledger-hash">6c7603e9b28b3363&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0141</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_27</span>
+  <span class="mono ledger-hash">4fe6776a72679d07&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0142</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_27</span>
+  <span class="mono ledger-hash">40fdcd9d1c34c77c&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0143</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_27</span>
+  <span class="mono ledger-hash">d94d17f7afba98a1&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0144</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_27</span>
+  <span class="mono ledger-hash">ae05a02f1f583278&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0145</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_27</span>
+  <span class="mono ledger-hash">2a6bbbad9f678672&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0146</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_27</span>
+  <span class="mono ledger-hash">2ba79b12aaee4004&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0147</span>
+  <span class="ledger-stage">duplicate_rejected</span>
+  <span class="mono ledger-sub dim">sub_synth_27</span>
+  <span class="mono ledger-hash">1025fdfffa0d2021&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0148</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_28</span>
+  <span class="mono ledger-hash">ab9167a041539b4f&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0149</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_28</span>
+  <span class="mono ledger-hash">776cde77a39871c8&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0150</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_28</span>
+  <span class="mono ledger-hash">8304de0b087e06cf&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0151</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_28</span>
+  <span class="mono ledger-hash">8029f7132ba2ce16&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0152</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_28</span>
+  <span class="mono ledger-hash">7c826c9eaa0c74d9&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0153</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_29</span>
+  <span class="mono ledger-hash">64916314439225a7&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0154</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_29</span>
+  <span class="mono ledger-hash">896036ad1175fbe9&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0155</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_29</span>
+  <span class="mono ledger-hash">b9a215f757157b87&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0156</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_29</span>
+  <span class="mono ledger-hash">f4676903ae879160&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0157</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_29</span>
+  <span class="mono ledger-hash">631ae7705879990c&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0158</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_29</span>
+  <span class="mono ledger-hash">6398ccac5c375d4c&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0159</span>
+  <span class="ledger-stage">duplicate_rejected</span>
+  <span class="mono ledger-sub dim">sub_synth_29</span>
+  <span class="mono ledger-hash">82ff62e086053f5b&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0160</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_30</span>
+  <span class="mono ledger-hash">29334a5675588105&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0161</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_30</span>
+  <span class="mono ledger-hash">d90f6efac1a388ff&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0162</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_30</span>
+  <span class="mono ledger-hash">808d1df8cc5d415b&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0163</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_30</span>
+  <span class="mono ledger-hash">c3ca984c2e5701c0&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0164</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_30</span>
+  <span class="mono ledger-hash">32dc301630b9254e&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0165</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_31</span>
+  <span class="mono ledger-hash">5d693ccc60eece76&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0166</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_31</span>
+  <span class="mono ledger-hash">f8e30a79e65c856d&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0167</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_31</span>
+  <span class="mono ledger-hash">dc1aabcbda4b5ede&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0168</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_31</span>
+  <span class="mono ledger-hash">de1400de36c30556&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0169</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_31</span>
+  <span class="mono ledger-hash">287caf8e30859f6b&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0170</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_32</span>
+  <span class="mono ledger-hash">5435fd656748ce36&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0171</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_32</span>
+  <span class="mono ledger-hash">955e72d467f7c532&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0172</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_32</span>
+  <span class="mono ledger-hash">f82acc04e50fe034&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0173</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_32</span>
+  <span class="mono ledger-hash">40d8b0f53e7953e9&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0174</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_32</span>
+  <span class="mono ledger-hash">ea1e77f91c001812&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0175</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_33</span>
+  <span class="mono ledger-hash">f08389f7ef5bbd49&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0176</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_33</span>
+  <span class="mono ledger-hash">1e666bd577996eaa&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0177</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_33</span>
+  <span class="mono ledger-hash">994719ed25305d2b&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0178</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_33</span>
+  <span class="mono ledger-hash">7500a81fa59783b6&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0179</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_33</span>
+  <span class="mono ledger-hash">40294c41cee44bcc&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0180</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_34</span>
+  <span class="mono ledger-hash">65d47e1740b8a7f4&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0181</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_34</span>
+  <span class="mono ledger-hash">c42c411eb7e35ae2&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0182</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_34</span>
+  <span class="mono ledger-hash">a3b87707a2996d87&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0183</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_34</span>
+  <span class="mono ledger-hash">45ebbbdb031c421f&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0184</span>
+  <span class="ledger-stage">action_blocked</span>
+  <span class="mono ledger-sub dim">sub_synth_34</span>
+  <span class="mono ledger-hash">71277830e059d182&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0185</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_35</span>
+  <span class="mono ledger-hash">e3102bb42f18beba&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0186</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_35</span>
+  <span class="mono ledger-hash">86557d882eba2c4f&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0187</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_35</span>
+  <span class="mono ledger-hash">5806d88985b97581&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0188</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_35</span>
+  <span class="mono ledger-hash">a2458fe1ce976c04&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0189</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_35</span>
+  <span class="mono ledger-hash">13f0dea0d1fd685d&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0190</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_36</span>
+  <span class="mono ledger-hash">73bc3d66fdc7848a&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0191</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_36</span>
+  <span class="mono ledger-hash">7359e3d0da001250&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0192</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_36</span>
+  <span class="mono ledger-hash">773fbb34c22d1752&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0193</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_36</span>
+  <span class="mono ledger-hash">42ada38383187a20&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0194</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_36</span>
+  <span class="mono ledger-hash">068a9478823f81c2&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0195</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_37</span>
+  <span class="mono ledger-hash">65652b51f797336e&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0196</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_37</span>
+  <span class="mono ledger-hash">50bfe5405664ae61&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0197</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_37</span>
+  <span class="mono ledger-hash">ebd2dc7e5c7a1827&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0198</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_37</span>
+  <span class="mono ledger-hash">3a7fe804c9f4d0ae&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0199</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_37</span>
+  <span class="mono ledger-hash">c354e8047f48981f&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0200</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_38</span>
+  <span class="mono ledger-hash">18dfa5a5519dbd2f&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0201</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_38</span>
+  <span class="mono ledger-hash">c92f6aa32ab8b32f&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0202</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_38</span>
+  <span class="mono ledger-hash">ec308bf7b6c47703&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0203</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_38</span>
+  <span class="mono ledger-hash">5becd8c4aa234d0c&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0204</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_38</span>
+  <span class="mono ledger-hash">e60ceec40e4c4b09&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0205</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_39</span>
+  <span class="mono ledger-hash">ef99e5c73595b8de&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0206</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_39</span>
+  <span class="mono ledger-hash">b2ac5123f37a7d24&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0207</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_39</span>
+  <span class="mono ledger-hash">b5bba0e73847f406&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0208</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_39</span>
+  <span class="mono ledger-hash">03b41bb3d2fe7168&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0209</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_39</span>
+  <span class="mono ledger-hash">5dd128e8d670488b&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0210</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_40</span>
+  <span class="mono ledger-hash">a606a6d2731a9405&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0211</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_40</span>
+  <span class="mono ledger-hash">72101be8b81b3e39&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0212</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_40</span>
+  <span class="mono ledger-hash">4d7776f5af90a1b8&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0213</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_40</span>
+  <span class="mono ledger-hash">84063793e3df0841&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0214</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_40</span>
+  <span class="mono ledger-hash">ad5127d09781311c&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0215</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_41</span>
+  <span class="mono ledger-hash">bb34de388670dd0a&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0216</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_41</span>
+  <span class="mono ledger-hash">27ee09f2286da620&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0217</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_41</span>
+  <span class="mono ledger-hash">666f1603af42e149&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0218</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_41</span>
+  <span class="mono ledger-hash">cc21dc2252eed1a9&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0219</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_41</span>
+  <span class="mono ledger-hash">bf747293a90b845f&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0220</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_42</span>
+  <span class="mono ledger-hash">ad6fb10484b7f576&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0221</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_42</span>
+  <span class="mono ledger-hash">f349bc38f2d34904&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0222</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_42</span>
+  <span class="mono ledger-hash">284c041dbbff633d&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0223</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_42</span>
+  <span class="mono ledger-hash">88c151d4c0b609e3&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0224</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_42</span>
+  <span class="mono ledger-hash">c67b656decd2fd15&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0225</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_43</span>
+  <span class="mono ledger-hash">6847fb2a38e94a61&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0226</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_43</span>
+  <span class="mono ledger-hash">ff28d07adfa90cbb&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0227</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_43</span>
+  <span class="mono ledger-hash">ebe85e14ccd5881b&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0228</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_43</span>
+  <span class="mono ledger-hash">88aee43e1fcd77fe&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0229</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_43</span>
+  <span class="mono ledger-hash">6a48001a34670fea&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0230</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_44</span>
+  <span class="mono ledger-hash">189b9d357ef62001&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0231</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_44</span>
+  <span class="mono ledger-hash">5ef57a841fb07a78&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0232</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_44</span>
+  <span class="mono ledger-hash">9322fd3a9bbdccdd&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0233</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_44</span>
+  <span class="mono ledger-hash">c9d1b27a24063992&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0234</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_44</span>
+  <span class="mono ledger-hash">115de29caf6ae932&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0235</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_45</span>
+  <span class="mono ledger-hash">e20582b126775d09&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0236</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_45</span>
+  <span class="mono ledger-hash">6febc5938755607c&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0237</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_45</span>
+  <span class="mono ledger-hash">57376593a8cced63&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0238</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_45</span>
+  <span class="mono ledger-hash">5806ec9e59b611e7&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0239</span>
+  <span class="ledger-stage">action_blocked</span>
+  <span class="mono ledger-sub dim">sub_synth_45</span>
+  <span class="mono ledger-hash">4579a09324a1f19b&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0240</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_46</span>
+  <span class="mono ledger-hash">50174e3165a7440b&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0241</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_46</span>
+  <span class="mono ledger-hash">ce26404f82702a60&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0242</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_46</span>
+  <span class="mono ledger-hash">4ec4de5c783b2324&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0243</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_46</span>
+  <span class="mono ledger-hash">8ebd64390b076a78&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0244</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_46</span>
+  <span class="mono ledger-hash">eae12148e95e356f&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0245</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_47</span>
+  <span class="mono ledger-hash">608d6b31e77c63f7&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0246</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_47</span>
+  <span class="mono ledger-hash">1d454333128f9e2f&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0247</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_47</span>
+  <span class="mono ledger-hash">050248138896b9d9&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0248</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_47</span>
+  <span class="mono ledger-hash">c1fd28ee3551524d&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0249</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_47</span>
+  <span class="mono ledger-hash">0b550f1f218eb3ad&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0250</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_48</span>
+  <span class="mono ledger-hash">da28837d271faa46&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0251</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_48</span>
+  <span class="mono ledger-hash">07810f3beb7c4613&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0252</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_48</span>
+  <span class="mono ledger-hash">5466a5f586cb3899&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0253</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_48</span>
+  <span class="mono ledger-hash">b0ca1ecd063bb170&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0254</span>
+  <span class="ledger-stage">action_blocked</span>
+  <span class="mono ledger-sub dim">sub_synth_48</span>
+  <span class="mono ledger-hash">d301b92a8c9e70ce&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0255</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_49</span>
+  <span class="mono ledger-hash">00c96604923dcb34&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0256</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_49</span>
+  <span class="mono ledger-hash">3cf3ad4cfed7b487&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0257</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_49</span>
+  <span class="mono ledger-hash">744f12a4967c8f90&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0258</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_49</span>
+  <span class="mono ledger-hash">0957ec423c686aa7&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0259</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_49</span>
+  <span class="mono ledger-hash">08aa3af5433df208&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0260</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_50</span>
+  <span class="mono ledger-hash">ed64a67da6811f3a&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0261</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_50</span>
+  <span class="mono ledger-hash">01d6e0f63d29a7c2&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0262</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_50</span>
+  <span class="mono ledger-hash">d2e10a6a37f6f3fd&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0263</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_50</span>
+  <span class="mono ledger-hash">61825ee2c3e3a11c&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0264</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_50</span>
+  <span class="mono ledger-hash">db2ebe4d23327c1f&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0265</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_51</span>
+  <span class="mono ledger-hash">adc1348f7ea8d976&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0266</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_51</span>
+  <span class="mono ledger-hash">3498b3b45711a600&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0267</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_51</span>
+  <span class="mono ledger-hash">64997d8284b8adf4&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0268</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_51</span>
+  <span class="mono ledger-hash">954b424cf20ddfc8&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0269</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_51</span>
+  <span class="mono ledger-hash">76a235332ea52cdf&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0270</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_52</span>
+  <span class="mono ledger-hash">866504e6bee33da6&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0271</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_52</span>
+  <span class="mono ledger-hash">5e5fb71fd10ec686&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0272</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_52</span>
+  <span class="mono ledger-hash">71bf0e74ba4b0d67&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0273</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_52</span>
+  <span class="mono ledger-hash">f01a88e82e92df31&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0274</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_52</span>
+  <span class="mono ledger-hash">7699233f3a849933&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0275</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_53</span>
+  <span class="mono ledger-hash">006283f54bb540d9&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0276</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_53</span>
+  <span class="mono ledger-hash">7d4f134bebadf469&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0277</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_53</span>
+  <span class="mono ledger-hash">4307da70591dd130&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0278</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_53</span>
+  <span class="mono ledger-hash">372d372ec5073a6f&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0279</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_53</span>
+  <span class="mono ledger-hash">474bbd7d4a4c7355&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0280</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_54</span>
+  <span class="mono ledger-hash">973bc8c8b5513575&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0281</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_54</span>
+  <span class="mono ledger-hash">dcf09dd612979921&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0282</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_54</span>
+  <span class="mono ledger-hash">0b2ce13d51ee63ee&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0283</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_54</span>
+  <span class="mono ledger-hash">efff414846106301&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0284</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_54</span>
+  <span class="mono ledger-hash">ced298640f15e334&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0285</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_55</span>
+  <span class="mono ledger-hash">4b41a96567066d79&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0286</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_55</span>
+  <span class="mono ledger-hash">4e8318d32de09461&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0287</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_55</span>
+  <span class="mono ledger-hash">dd5518a9e428b9b6&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0288</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_55</span>
+  <span class="mono ledger-hash">f2fa8b678bc95f9c&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0289</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_55</span>
+  <span class="mono ledger-hash">f4ccc7ebae5d1753&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0290</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_56</span>
+  <span class="mono ledger-hash">3c2edb5b39a1e370&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0291</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_56</span>
+  <span class="mono ledger-hash">d9d0eeda237f94a8&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0292</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_56</span>
+  <span class="mono ledger-hash">90b2882cec44d482&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0293</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_56</span>
+  <span class="mono ledger-hash">fef32b33f0be28fe&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0294</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_56</span>
+  <span class="mono ledger-hash">f36fa69828b00214&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0295</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_57</span>
+  <span class="mono ledger-hash">de907630bfc6123a&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0296</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_57</span>
+  <span class="mono ledger-hash">7f4f51cd66cc1b5f&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0297</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_57</span>
+  <span class="mono ledger-hash">7e57ec191130927e&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0298</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_57</span>
+  <span class="mono ledger-hash">50d08bc71740fe12&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0299</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_57</span>
+  <span class="mono ledger-hash">bb9ef76e7acdfc21&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0300</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_58</span>
+  <span class="mono ledger-hash">f61b66001cd0a683&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0301</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_58</span>
+  <span class="mono ledger-hash">ee4f1181c334455e&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0302</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_58</span>
+  <span class="mono ledger-hash">286983f648181822&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0303</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_58</span>
+  <span class="mono ledger-hash">460b00e36ecfa653&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0304</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_58</span>
+  <span class="mono ledger-hash">8c3dfb1d8c5d76c5&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0305</span>
+  <span class="ledger-stage">event_received</span>
+  <span class="mono ledger-sub dim">sub_synth_59</span>
+  <span class="mono ledger-hash">3487c670786cd36e&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0306</span>
+  <span class="ledger-stage">classified</span>
+  <span class="mono ledger-sub dim">sub_synth_59</span>
+  <span class="mono ledger-hash">ae6bf7cc9ba96284&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0307</span>
+  <span class="ledger-stage">action_proposed</span>
+  <span class="mono ledger-sub dim">sub_synth_59</span>
+  <span class="mono ledger-hash">8758e696c12daafc&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0308</span>
+  <span class="ledger-stage">policy_verdict</span>
+  <span class="mono ledger-sub dim">sub_synth_59</span>
+  <span class="mono ledger-hash">6a3cef15a514339e&hellip;</span>
+</div><div class="ledger-row">
+  <span class="mono ledger-seq">0309</span>
+  <span class="ledger-stage">action_executed</span>
+  <span class="mono ledger-sub dim">sub_synth_59</span>
+  <span class="mono ledger-hash">a3a2df07cb939ea2&hellip;</span>
+</div></div>
+    <p class="ledger-note">Each entry's hash is derived from the entry before it. Altering any single record breaks every hash after it — run <code class="mono">rebound verify-audit</code> to check.</p>
+  </div></section>
+
+  <section class="exhibit">
+  <span class="tick tl"></span><span class="tick tr"></span><span class="tick bl"></span><span class="tick br"></span>
+  <header class="exhibit-head"><span class="exhibit-tag">EXHIBIT F</span><h2>Flagged Items</h2></header>
+  <div class="exhibit-body">
+    <div class="flag-row">
+  <span class="mono flag-id">scn_9</span>
+  <span class="mono">Unknown (ambiguous)</span>
+  <span class="flag-reason">attempt 1 exceeds max 0 for unknown</span>
+</div><div class="flag-row">
+  <span class="mono flag-id">scn_34</span>
+  <span class="mono">Unknown (ambiguous)</span>
+  <span class="flag-reason">attempt 1 exceeds max 0 for unknown</span>
+</div><div class="flag-row">
+  <span class="mono flag-id">scn_45</span>
+  <span class="mono">Unknown (ambiguous)</span>
+  <span class="flag-reason">attempt 1 exceeds max 0 for unknown</span>
+</div><div class="flag-row">
+  <span class="mono flag-id">scn_48</span>
+  <span class="mono">Unknown (ambiguous)</span>
+  <span class="flag-reason">attempt 1 exceeds max 0 for unknown</span>
+</div>
+  </div></section>
+
+  <div class="statement">
+    <p><b>Where AI was used:</b> classifying ambiguous free-text failure reasons (with a confidence threshold and an abstain path), and drafting — never sending — customer nudge text.</p>
+    <p><b>Where AI was not used:</b> mapping documented Razorpay fields to a cause, choosing an action, authorising an action, or touching a money API. Those are deterministic code, by design, for every record in this dossier.</p>
+    <div class="sign"><span>SIGNED &middot; REBOUND POLICY GATE</span><span>CASE EADD3E2E</span></div>
+  </div>
+
+  <footer>REBOUND &middot; github.com/HarshdipSaha/razorpay-ai-buildathon</footer>
+</div>
 </body></html>

@@ -19,6 +19,13 @@ venv/
 # ARE committed as evidence, this dir's raw SQLite/JSONL/cache are not
 .rebound_data/
 
+# Impeccable design-skill internal tool state (not meaningful without its
+# comp-led pipeline, which this project doesn't use — no image-gen tool
+# available). .impeccable/review/ (screenshots) and .impeccable/surfaces/
+# (the direction-contract brief) ARE committed as design evidence.
+.impeccable/build/
+.impeccable/mocks/
+
 # node
 node_modules/
 dist/
