@@ -1,6 +1,8 @@
-# Razorpay AI Buildathon — submission
+# Rebound — Razorpay AI Buildathon submission
 
-> Project name and track: **to be decided** (idea selection in progress — see `aidlc-docs/process-log.md`).
+> **Track 3 · AI Revenue Recovery.** When a Razorpay subscription payment fails four times, Razorpay stops trying and tells the merchant to charge the customer by hand. Rebound picks up from there: it reads *why* the payment failed from Razorpay's own error fields, chooses a sensible next step for that reason — retry later, send a fresh payment link, ask the customer to re-approve, or hand it to a human — and runs every step past a rulebook the AI is not allowed to override. Every decision is written to a tamper-proof record.
+>
+> Working name; requirements in [`aidlc-docs/inception/01-requirements.md`](aidlc-docs/inception/01-requirements.md), design in [`02-application-design.md`](aidlc-docs/inception/02-application-design.md).
 
 This repository is built with **[AI-DLC](aidlc-docs/README.md)** — an AI-Driven Development Lifecycle in which the process is as inspectable as the code:
 
@@ -15,9 +17,9 @@ This repository is built with **[AI-DLC](aidlc-docs/README.md)** — an AI-Drive
 | Stage | State |
 |---|---|
 | Hackathon brief captured | ✅ |
-| Research (market + academic) | 🔄 in progress |
-| Idea selection (LLM council) | ⏳ |
-| AI-DLC Inception (requirements, design) | 🔄 stage 0 done |
+| Research (market + academic) | ✅ `docs/research-synthesis.md` |
+| Idea selection (LLM council) | ✅ Candidate A approved — `docs/council-verdict.md` |
+| AI-DLC Inception (requirements, design) | 🔄 stages 0–1 approved, stage 2 at gate |
 | Construction efforts | ⏳ |
 | Pitch video | ⏳ |
 | Form submitted | ⏳ deadline 5 Sept 2026 |
