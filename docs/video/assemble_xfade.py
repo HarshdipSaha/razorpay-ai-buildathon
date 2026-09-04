@@ -10,8 +10,16 @@ ROOT = pathlib.Path(__file__).parent
 SLIDES = ROOT / "slides"
 AUDIO = ROOT / "audio"
 SCENES = [
-    "01_title", "02_architecture", "03_tests", "04_demo_run", "05_metrics",
-    "06_idempotency", "07_abstain", "08_tamper", "09_scope", "10_whatbroke", "11_closing",
+    # Reordered per LLM council verdict (2026-09-05): the strongest, most human
+    # material (the near-miss bug) was buried at position 10 in a synthesized
+    # voice. It now opens the video, in the builder's real voice, so the
+    # technical tour that follows plays as proof of that story rather than
+    # 3 minutes of stats before any stakes exist. Scenes 2-9 and 11 are
+    # deliberately left untouched (content, order, and TTS voice) -- the
+    # council explicitly rejected re-recording everything or adding new
+    # visual polish as low-ROI against the same-day deadline.
+    "10_whatbroke", "01_title", "02_architecture", "03_tests", "04_demo_run", "05_metrics",
+    "06_idempotency", "07_abstain", "08_tamper", "09_scope", "11_closing",
 ]
 XFADE = 0.5  # crossfade duration, seconds
 PAD = 0.5    # silence padding held at full opacity before/after each narration clip
