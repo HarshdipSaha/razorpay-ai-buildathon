@@ -1,6 +1,6 @@
 # Pitch video — script and production notes
 
-**Final video:** `docs/rebound-demo.mp4` — 3:05, 1280×720, h264/aac, crossfade transitions between scenes.
+**Final video:** `docs/rebound-demo.mp4` — 3:48, 1280×720, h264/aac, crossfade transitions between scenes. Narrated by Microsoft Zira (offline SAPI) via SSML with explicit pause breaks, opening on the "what broke" cold open per the LLM council verdict (`docs/council-verdict-video.md`). The prior 3:05 David-voice cut is kept as `docs/rebound-demo.backup-3m05s.mp4`.
 
 ## How it was made (fully reproducible, no screen recording)
 
@@ -15,18 +15,20 @@ Regenerate with: `python docs/video/build_slides.py` (rewrites slide HTML from `
 
 ## Scene breakdown (narration verbatim from `docs/video/audio/*.txt` / `_copydesk_final.md`)
 
-| # | Scene | Narration length | What's on screen |
-|---|---|---|---|
-| 1 | Title | 20.1s | The one-sentence problem statement, centered, spare |
-| 2 | Architecture | 24.2s | "Words, not wallets" — a single flow diagram, no cards |
-| 3 | Tests | 7.5s | Real `pytest -q` output: 54 passed |
-| 4 | Batch run | 13.5s | A 3-up verdict strip (0 violations, 0 double charges, 4 escalated) echoing the real report's Exhibit A |
-| 5 | The report | 18.1s | Real screenshot of the redesigned audit-dossier report page |
-| 6 | Idempotency | 16.8s | The engineered failure: 5 duplicate webhooks in, 0 double charges out |
-| 7 | Abstain | 12.3s | Where the system says "I don't know" instead of guessing |
-| 8 | Tamper | 14.3s | Real before/after `verify-audit` output around a real byte edit |
-| 9 | Scope decision | 19.3s | Why no login/API key is needed, as inline facts not a bullet dump |
-| 10 | What broke | 22.9s | 3 bugs, weighted, the one that actually mattered singled out |
-| 11 | Closing | 9.9s | Case-file callback ("CASE CLOSED"), repo link, summary stats |
+Play order below is the council's reorder: the "what broke" scene opens the video as a cold-open hook, ahead of the title card. File names keep their original numbering (`10_whatbroke` still plays first) so the pipeline stays stable.
 
-Total narration: 178.7s; final video with crossfade transitions: 184.7s (3:05).
+| Play # | File | Scene | Narration | What's on screen |
+|---|---|---|---|---|
+| 1 | `10_whatbroke` | Cold open: what broke | 31.2s | 3 bugs, weighted; the one that actually mattered singled out |
+| 2 | `01_title` | Title | 28.1s | The one-sentence problem statement, centered, spare |
+| 3 | `02_architecture` | Architecture | 26.3s | "Words, not wallets" — a single flow diagram; names "the wallet gate" |
+| 4 | `03_tests` | Tests | 10.0s | Real `pytest -q` output: 54 passed |
+| 5 | `04_demo_run` | Batch run | 16.4s | A 3-up verdict strip echoing the real report's Exhibit A |
+| 6 | `05_metrics` | The report | 22.3s | Real screenshot of the redesigned audit-dossier report page |
+| 7 | `06_idempotency` | Idempotency | 21.0s | 5 duplicate webhooks in, 0 double charges out |
+| 8 | `07_abstain` | Abstain | 12.8s | Where the system says "I don't know" instead of guessing |
+| 9 | `08_tamper` | Tamper | 18.6s | Real before/after `verify-audit` output around a real byte edit |
+| 10 | `09_scope` | Scope decision | 21.8s | Why no login/API key is needed |
+| 11 | `11_closing` | Closing | 13.4s | "CASE CLOSED" callback, repo link, summary stats; echoes "the wallet gate" |
+
+Total narration: 221.9s (incl. SSML pauses); final video with crossfade transitions: 228.1s (3:48).

@@ -1,1 +1,1 @@
-One of the held-out cases was genuinely unclear, so the classifier passed on it. It came back as unknown, and the gate escalates unknown to a person every time. It doesn't guess with someone's money.
+One of the held-out cases was genuinely unclear, so the classifier passed on it. [pause] It came back as unknown, and the gate escalates unknown to a person every single time, [pause] because it doesn't guess with someone's money.

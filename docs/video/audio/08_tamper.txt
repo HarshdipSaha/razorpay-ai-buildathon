@@ -1,1 +1,1 @@
-Verify passes clean. Then I open the log file and change one byte by hand. Run verify again, and it fails on the exact record I touched. Each entry's hash depends on the one before it, so there's nowhere to hide a change.
+Verify passes clean. [long pause] Then I open the log file, [pause] and I change one byte. [pause] By hand. [long pause] Run verify again, [pause] and it fails on the exact record I touched. [long pause] Every entry's hash depends on the one before it. [pause] So there's nowhere to hide a change.

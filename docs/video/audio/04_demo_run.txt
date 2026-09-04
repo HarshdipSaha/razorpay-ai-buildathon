@@ -1,1 +1,1 @@
-Sixty scenarios, seeded so you can reproduce this exact run. Zero policy violations. Zero double charges. The four cases that came back ambiguous got escalated to a person instead of guessed at.
+60 scenarios, seeded so you can reproduce this exact run yourself. [long pause] 0 policy violations. [pause] 0 double charges. [long pause] And the 4 cases that came back ambiguous? [pause] They got escalated to a person instead of guessed at.
