@@ -273,9 +273,68 @@ page("""
 </div>
 """, "11_closing")
 
+# ---------- Scene 12: how it was built (AI-DLC), plays just before the close ----------
+page("""
+<div style="padding:60px 80px 48px; height:100%; display:flex; flex-direction:column;">
+  <h1 class="headline" style="font-size:42px;">How it was built: AI-DLC.</h1>
+
+  <div style="flex:1; display:flex; flex-direction:column; justify-content:center; gap:26px; margin-top:8px;">
+
+    <div style="display:grid; grid-template-columns:1fr 44px 1fr; align-items:stretch; column-gap:0;">
+
+      <div style="border:1px solid var(--hair); padding:22px 26px;">
+        <div style="display:flex; justify-content:space-between; align-items:baseline;">
+          <div class="tag">Inception</div>
+          <div class="meta" style="font-size:12px;">runs once</div>
+        </div>
+        <div class="mono" style="margin-top:18px; font-size:17px; color:var(--ink); display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+          <span>detect</span><span class="dim">&rarr;</span><span>requirements</span><span class="dim">&rarr;</span><span>design</span>
+        </div>
+        <div class="mono" style="margin-top:14px; font-size:12px; letter-spacing:.06em; color:var(--ok);">
+          GATE I-0 &#10003; &nbsp; GATE I-1 &#10003; &nbsp; GATE I-2 &#10003;
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; justify-content:center;">
+        <span class="mono dim" style="font-size:26px;">&rarr;</span>
+      </div>
+
+      <div style="border:1px solid var(--hair); padding:22px 26px;">
+        <div style="display:flex; justify-content:space-between; align-items:baseline;">
+          <div class="tag">Construction</div>
+          <div class="meta" style="font-size:12px;">every change</div>
+        </div>
+        <div class="mono" style="margin-top:18px; font-size:15px; color:var(--ink); display:flex; gap:8px; flex-wrap:wrap;">
+          <span style="border:1px solid var(--hair); padding:3px 9px;">001</span>
+          <span style="border:1px solid var(--hair); padding:3px 9px;">002</span>
+          <span style="border:1px solid var(--hair); padding:3px 9px;">003</span>
+          <span style="border:1px solid var(--hair); padding:3px 9px;">004</span>
+          <span style="border:1px solid var(--hair); padding:3px 9px; color:var(--dim);">005</span>
+          <span style="border:1px solid var(--hair); padding:3px 9px;">006</span>
+        </div>
+        <div class="mono" style="margin-top:14px; font-size:12px; letter-spacing:.06em; color:var(--dim);">
+          each: state file &middot; delta vs. baseline &middot; approval gate
+        </div>
+      </div>
+    </div>
+
+    <div style="border-top:1px solid var(--hair); padding-top:18px; display:grid; grid-template-columns:repeat(3,1fr); column-gap:32px;">
+      <div><div class="mono amber" style="font-size:13px; letter-spacing:.08em;">process-log.md</div><p class="support" style="font-size:16px; margin-top:6px;">Every tool used, in order, including what broke.</p></div>
+      <div><div class="mono amber" style="font-size:13px; letter-spacing:.08em;">audit.md</div><p class="support" style="font-size:16px; margin-top:6px;">Every gate and every course correction.</p></div>
+      <div><div class="mono amber" style="font-size:13px; letter-spacing:.08em;">registry.md</div><p class="support" style="font-size:16px; margin-top:6px;">The derived view of where everything stands.</p></div>
+    </div>
+  </div>
+
+  <p class="support" style="font-size:19px; margin-top:6px;">3 gates before any code. 6 efforts to build it. The process is as inspectable as the code.</p>
+</div>
+""", "12_aidlc")
+
 print("Wrote", len(list(SLIDES.glob("*.html"))), "slide HTML files to", SLIDES)
 
-NARRATION = {
+# NOTE: narration .txt files are NOT written here anymore. They are the canonical
+# spoken-cadence copy (with [pause] markers) maintained in audio/*.txt directly and
+# mirrored in _copydesk_spoken.md. The old dict below would clobber them.
+NARRATION_LEGACY_DISABLED = {
 "01_title": "A Razorpay subscription fails to charge four times in a row, and Razorpay just stops. The subscription goes to halted, and the merchant gets a note: charge this one by hand. I built Rebound to pick up right there. It figures out why the payment failed, decides what to do about it, and writes down every step so you can check its work.",
 "02_architecture": "Here's the shape of it. A payment fails, and a rule checks Razorpay's own error fields to find the cause. If that's ambiguous, an LLM takes a pass, but it's allowed to say it doesn't know. Then a gate, written as plain rules, decides whether the proposed action actually happens. That's the whole rule: the model deals in words, the gate deals in wallets, and the two never swap jobs.",
 "03_tests": "Before I show you anything else, here's proof it runs. Fifty four tests, on this machine, right now.",
@@ -289,7 +348,4 @@ NARRATION = {
 "11_closing": "That's Rebound: words from the model, decisions from the gate, and a ledger that proves which one did what. You don't have to trust the demo. You can read it.",
 }
 
-for name, text in NARRATION.items():
-    (AUDIO / f"{name}.txt").write_text(text, encoding="utf-8")
-
-print("Wrote", len(NARRATION), "narration text files to", AUDIO)
+# (legacy narration writer removed -- see note above; audio/*.txt is the source of truth)

@@ -19,7 +19,10 @@ SCENES = [
     # council explicitly rejected re-recording everything or adding new
     # visual polish as low-ROI against the same-day deadline.
     "10_whatbroke", "01_title", "02_architecture", "03_tests", "04_demo_run", "05_metrics",
-    "06_idempotency", "07_abstain", "08_tamper", "09_scope", "11_closing",
+    "06_idempotency", "07_abstain", "08_tamper", "09_scope",
+    # 12_aidlc: how the project itself was built (AI-DLC: inception -> construction),
+    # placed just before the close per user request.
+    "12_aidlc", "11_closing",
 ]
 XFADE = 0.5  # crossfade duration, seconds
 PAD = 0.5    # silence padding held at full opacity before/after each narration clip

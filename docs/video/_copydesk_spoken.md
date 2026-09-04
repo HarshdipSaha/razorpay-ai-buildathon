@@ -32,5 +32,10 @@ Verify passes clean. [long pause] Then I open the log file, [pause] and I change
 ## 09_scope
 You don't need a Razorpay account to run any of this. [long pause] The causes come from Razorpay's own published error fields, cited right there in the code, and the batch runs against a simulated client I wrote myself, so none of it touches a real network. [long pause] Drop the Anthropic key and the classifier just abstains more, [pause] which the design already treats as a perfectly fine outcome.
 
+## 12_aidlc (plays just before the close; added on user request to explain the build methodology)
+One last thing, [pause] about how this was built. [long pause] The whole project ran on AI-DLC. [pause] Inception happens once, requirements then design, [pause] each behind an approval gate. [long pause] Then every change is a numbered effort, [pause] with its own state file and its own requirements-delta. [long pause] Here, that meant 3 gates before any code, 6 efforts to build it, [pause] and a process log that records every tool I used and every course correction along the way. [long pause] The process is as inspectable as the code.
+
+Review gate for this scene: prose-review 0 hard fails (advisories applied: "requirements-delta" for precision; dropped the summarizing "So" from the last line). Craft-review's two edits applied: one pause before the two-item inception list instead of three; the two numbers spoken in one breath. The two reviewers disagreed on the final line (prose: cut as a bow; craft: keep as a genuine destination). Kept, because the next scene's "You can read it" pays it off directly.
+
 ## 11_closing
 So that's Rebound. [long pause] Words from the model. [pause] Decisions from the wallet gate. [pause] And a ledger that proves which one did what. [long pause] You don't have to trust the demo. [pause] You can read it.

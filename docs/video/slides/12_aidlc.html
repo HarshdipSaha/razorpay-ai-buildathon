@@ -1,0 +1,99 @@
+<!doctype html><html><head><meta charset='utf-8'>
+<style>
+  :root {
+    --ground:#0a0b0d; --ink:#e8e6df; --dim:#8a8d94; --hair:#24262b;
+    --amber:#e8a33d; --ok:#7fae6c; --bad:#c06a5f;
+    --mono: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing:border-box; }
+  html, body { margin:0; padding:0; }
+  ::selection { background:var(--amber); color:#0a0b0d; }
+  .stage {
+    width:1280px; height:720px; position:relative; overflow:hidden;
+    background:var(--ground); color:var(--ink); font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono { font-family:var(--mono); font-variant-numeric:tabular-nums; }
+  .dim { color:var(--dim); }
+  .amber { color:var(--amber); }
+  .ok { color:var(--ok); }
+  .bad { color:var(--bad); }
+
+  h1.headline {
+    font-size:46px; font-weight:600; letter-spacing:-0.01em; line-height:1.2;
+    margin:0; color:var(--ink); max-width:1020px; text-wrap:balance;
+  }
+  p.support {
+    font-size:22px; line-height:1.55; color:var(--dim); margin:0; max-width:840px;
+    font-weight:400;
+  }
+  .tag {
+    display:inline-block; font-family:var(--mono); font-size:13px; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--amber); border:1px solid var(--amber);
+    padding:5px 12px; line-height:1;
+  }
+  .tag.dim { color:var(--dim); border-color:var(--hair); }
+
+  .tick { position:absolute; width:16px; height:16px; border:1px solid var(--amber); opacity:.55; }
+  .tick.tl { top:0; left:0; border-right:none; border-bottom:none; }
+  .tick.tr { top:0; right:0; border-left:none; border-bottom:none; }
+  .tick.bl { bottom:0; left:0; border-right:none; border-top:none; }
+  .tick.br { bottom:0; right:0; border-left:none; border-top:none; }
+
+  .meta { font-family:var(--mono); font-size:14px; letter-spacing:.08em; color:var(--dim); }
+</style>
+</head><body><div class='stage'>
+<div style="padding:60px 80px 48px; height:100%; display:flex; flex-direction:column;">
+  <h1 class="headline" style="font-size:42px;">How it was built: AI-DLC.</h1>
+
+  <div style="flex:1; display:flex; flex-direction:column; justify-content:center; gap:26px; margin-top:8px;">
+
+    <div style="display:grid; grid-template-columns:1fr 44px 1fr; align-items:stretch; column-gap:0;">
+
+      <div style="border:1px solid var(--hair); padding:22px 26px;">
+        <div style="display:flex; justify-content:space-between; align-items:baseline;">
+          <div class="tag">Inception</div>
+          <div class="meta" style="font-size:12px;">runs once</div>
+        </div>
+        <div class="mono" style="margin-top:18px; font-size:17px; color:var(--ink); display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+          <span>detect</span><span class="dim">&rarr;</span><span>requirements</span><span class="dim">&rarr;</span><span>design</span>
+        </div>
+        <div class="mono" style="margin-top:14px; font-size:12px; letter-spacing:.06em; color:var(--ok);">
+          GATE I-0 &#10003; &nbsp; GATE I-1 &#10003; &nbsp; GATE I-2 &#10003;
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; justify-content:center;">
+        <span class="mono dim" style="font-size:26px;">&rarr;</span>
+      </div>
+
+      <div style="border:1px solid var(--hair); padding:22px 26px;">
+        <div style="display:flex; justify-content:space-between; align-items:baseline;">
+          <div class="tag">Construction</div>
+          <div class="meta" style="font-size:12px;">every change</div>
+        </div>
+        <div class="mono" style="margin-top:18px; font-size:15px; color:var(--ink); display:flex; gap:8px; flex-wrap:wrap;">
+          <span style="border:1px solid var(--hair); padding:3px 9px;">001</span>
+          <span style="border:1px solid var(--hair); padding:3px 9px;">002</span>
+          <span style="border:1px solid var(--hair); padding:3px 9px;">003</span>
+          <span style="border:1px solid var(--hair); padding:3px 9px;">004</span>
+          <span style="border:1px solid var(--hair); padding:3px 9px; color:var(--dim);">005</span>
+          <span style="border:1px solid var(--hair); padding:3px 9px;">006</span>
+        </div>
+        <div class="mono" style="margin-top:14px; font-size:12px; letter-spacing:.06em; color:var(--dim);">
+          each: state file &middot; delta vs. baseline &middot; approval gate
+        </div>
+      </div>
+    </div>
+
+    <div style="border-top:1px solid var(--hair); padding-top:18px; display:grid; grid-template-columns:repeat(3,1fr); column-gap:32px;">
+      <div><div class="mono amber" style="font-size:13px; letter-spacing:.08em;">process-log.md</div><p class="support" style="font-size:16px; margin-top:6px;">Every tool used, in order, including what broke.</p></div>
+      <div><div class="mono amber" style="font-size:13px; letter-spacing:.08em;">audit.md</div><p class="support" style="font-size:16px; margin-top:6px;">Every gate and every course correction.</p></div>
+      <div><div class="mono amber" style="font-size:13px; letter-spacing:.08em;">registry.md</div><p class="support" style="font-size:16px; margin-top:6px;">The derived view of where everything stands.</p></div>
+    </div>
+  </div>
+
+  <p class="support" style="font-size:19px; margin-top:6px;">3 gates before any code. 6 efforts to build it. The process is as inspectable as the code.</p>
+</div>
+</div></body></html>

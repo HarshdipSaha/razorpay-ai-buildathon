@@ -29,6 +29,7 @@ Play order below is the council's reorder: the "what broke" scene opens the vide
 | 8 | `07_abstain` | Abstain | 12.8s | Where the system says "I don't know" instead of guessing |
 | 9 | `08_tamper` | Tamper | 18.6s | Real before/after `verify-audit` output around a real byte edit |
 | 10 | `09_scope` | Scope decision | 21.8s | Why no login/API key is needed |
-| 11 | `11_closing` | Closing | 13.4s | "CASE CLOSED" callback, repo link, summary stats; echoes "the wallet gate" |
+| 11 | `12_aidlc` | How it was built: AI-DLC | 30.8s | Inception (detect → requirements → design, gates I-0/I-1/I-2) → Construction (efforts 001–006, 005 dimmed as deliberately skipped); the three cross-cutting artifacts (process-log, audit, registry) |
+| 12 | `11_closing` | Closing | 13.4s | "CASE CLOSED" callback, repo link, summary stats; echoes "the wallet gate" |
 
-Total narration: 221.9s (incl. SSML pauses); final video with crossfade transitions: 228.1s (3:48).
+Total narration: 252.7s (incl. SSML pauses); final video with crossfade transitions: 259.4s (4:19).
