@@ -14,13 +14,13 @@ Rebuilt from `inception/*` and `efforts/*/effort-state.md`. Do not edit by hand 
 
 ## Efforts
 
-Full construction plan (26 tasks, TDD, reviewed 5 rounds, approved): `docs/superpowers/plans/2026-09-04-rebound-recovery-agent.md`. **Work is paused here per user instruction — the plan is the deliverable; no construction has started.**
+Full construction plan: `docs/superpowers/plans/2026-09-04-rebound-recovery-agent.md`. **User gave full go-ahead (audit.md D-8); construction complete for everything not requiring the builder's own Razorpay login.**
 
-| # | Ref | Type | State | Requirements delta | Notes |
-|---|---|---|---|---|---|
-| 001 | `scaffold-ingest-audit` | feature | plan approved, **not started** | `efforts/001-scaffold-ingest-audit/requirements-delta.md` | plan doc Tasks 1-4, 12-14, 13a, 19-20 |
-| 002 | `taxonomy-classifier` | feature | plan approved, **not started** | — (plan doc Tasks 5-7) | depends on 001; parallel with 003 |
-| 003 | `policy-gate-actions` | feature | plan approved, **not started** | — (plan doc Tasks 8-11) | depends on 001; parallel with 002 |
-| 004 | `sim-batch-report` | feature | plan approved, **not started** | — (plan doc Tasks 15-18) | depends on 002, 003 |
-| 005 | `hour-zero-capture` | feature | plan approved, **blocked** — waiting on `.env` test keys from user | — (plan doc Tasks 21-22) | independent of 001-004; load-bearing per council verdict |
-| 006 | `deliverables` | feature | plan approved, **not started** | — (plan doc Tasks 23-25) | depends on 004, 005 |
+| # | Ref | Type | State | Notes |
+|---|---|---|---|---|
+| 001 | `scaffold-ingest-audit` | feature | **complete** — 54/54 tests pass | scaffold, models, clock, audit log, event store, fixtures, webhook receiver, adapter, pipeline, CLI all built |
+| 002 | `taxonomy-classifier` | feature | **complete** | taxonomy grounded to documented Razorpay fields, rule classifier, LLM residue classifier w/ abstain + cache |
+| 003 | `policy-gate-actions` | feature | **complete** | gate, planner, executor, nudge drafter. Fixed `policy.yaml`'s attempts-exhausted bug found in plan review before it could ship |
+| 004 | `sim-batch-report` | feature | **complete** | scenario generator, batch runner, Markdown/JSON/HTML report — real run: 0 policy violations, 0 double charges, 100% held-out accuracy |
+| 005 | `hour-zero-capture` | feature | **deliberately skipped** | needs the builder's own Razorpay test-mode login — out of scope per explicit "no login/API key" instruction. Documented in README "Scope decision" and `fixtures/recorded/README.md`, not silently dropped |
+| 006 | `deliverables` | feature | **README/FAILURES.md/submission.md complete; video in progress** | Simulated-Razorpay-client deviation from the original plan sketch (needed to honor "no login") recorded in `process-log.md` #23 |

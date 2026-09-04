@@ -1,0 +1,442 @@
+{
+  "duplicates_rejected": 5,
+  "double_charges": 0,
+  "policy_violations": 0,
+  "false_escalations": 0,
+  "per_cause": {
+    "bank_or_gateway_error": {
+      "allowed": 12,
+      "blocked": 0,
+      "escalated": 0
+    },
+    "insufficient_funds": {
+      "allowed": 21,
+      "blocked": 0,
+      "escalated": 0
+    },
+    "instrument_expired_or_blocked": {
+      "allowed": 6,
+      "blocked": 0,
+      "escalated": 0
+    },
+    "mandate_not_active": {
+      "allowed": 5,
+      "blocked": 0,
+      "escalated": 0
+    },
+    "unknown": {
+      "allowed": 0,
+      "blocked": 0,
+      "escalated": 4
+    },
+    "authentication_failed": {
+      "allowed": 9,
+      "blocked": 0,
+      "escalated": 0
+    },
+    "limit_exceeded": {
+      "allowed": 3,
+      "blocked": 0,
+      "escalated": 0
+    }
+  },
+  "classifier": {
+    "heldout_count": 20,
+    "accuracy": 1.0,
+    "abstain_rate": 0.05,
+    "confusion_matrix": {
+      "insufficient_funds->insufficient_funds": 8,
+      "instrument_expired_or_blocked->instrument_expired_or_blocked": 2,
+      "bank_or_gateway_error->bank_or_gateway_error": 5,
+      "authentication_failed->authentication_failed": 2,
+      "limit_exceeded->limit_exceeded": 2,
+      "unknown->unknown": 1
+    },
+    "per_cause": {
+      "authentication_failed": {
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "bank_or_gateway_error": {
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "instrument_expired_or_blocked": {
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "insufficient_funds": {
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "limit_exceeded": {
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "unknown": {
+        "precision": 1.0,
+        "recall": 1.0
+      }
+    }
+  },
+  "exceptions": [
+    {
+      "scenario_id": "scn_9",
+      "truth_cause": "unknown",
+      "reason": "attempt 1 exceeds max 0 for unknown"
+    },
+    {
+      "scenario_id": "scn_34",
+      "truth_cause": "unknown",
+      "reason": "attempt 1 exceeds max 0 for unknown"
+    },
+    {
+      "scenario_id": "scn_45",
+      "truth_cause": "unknown",
+      "reason": "attempt 1 exceeds max 0 for unknown"
+    },
+    {
+      "scenario_id": "scn_48",
+      "truth_cause": "unknown",
+      "reason": "attempt 1 exceeds max 0 for unknown"
+    }
+  ],
+  "classification_citations": [
+    {
+      "scenario_id": "scn_0",
+      "cause": "bank_or_gateway_error",
+      "provenance": "rule",
+      "mapped_from": "error_reason=bank_technical_error"
+    },
+    {
+      "scenario_id": "scn_1",
+      "cause": "insufficient_funds",
+      "provenance": "rule",
+      "mapped_from": "error_reason=insufficient_funds"
+    },
+    {
+      "scenario_id": "scn_2",
+      "cause": "bank_or_gateway_error",
+      "provenance": "rule",
+      "mapped_from": "error_reason=bank_technical_error"
+    },
+    {
+      "scenario_id": "scn_3",
+      "cause": "insufficient_funds",
+      "provenance": "rule",
+      "mapped_from": "error_reason=insufficient_funds"
+    },
+    {
+      "scenario_id": "scn_4",
+      "cause": "insufficient_funds",
+      "provenance": "rule",
+      "mapped_from": "error_reason=insufficient_funds"
+    },
+    {
+      "scenario_id": "scn_5",
+      "cause": "bank_or_gateway_error",
+      "provenance": "rule",
+      "mapped_from": "error_reason=bank_technical_error"
+    },
+    {
+      "scenario_id": "scn_6",
+      "cause": "instrument_expired_or_blocked",
+      "provenance": "rule",
+      "mapped_from": "error_reason=card_expired"
+    },
+    {
+      "scenario_id": "scn_7",
+      "cause": "mandate_not_active",
+      "provenance": "rule",
+      "mapped_from": "token_status=paused"
+    },
+    {
+      "scenario_id": "scn_8",
+      "cause": "instrument_expired_or_blocked",
+      "provenance": "rule",
+      "mapped_from": "error_reason=card_expired"
+    },
+    {
+      "scenario_id": "scn_10",
+      "cause": "insufficient_funds",
+      "provenance": "rule",
+      "mapped_from": "error_reason=insufficient_funds"
+    },
+    {
+      "scenario_id": "scn_11",
+      "cause": "mandate_not_active",
+      "provenance": "rule",
+      "mapped_from": "token_status=paused"
+    },
+    {
+      "scenario_id": "scn_12",
+      "cause": "bank_or_gateway_error",
+      "provenance": "rule",
+      "mapped_from": "error_reason=bank_technical_error"
+    },
+    {
+      "scenario_id": "scn_13",
+      "cause": "insufficient_funds",
+      "provenance": "rule",
+      "mapped_from": "error_reason=insufficient_funds"
+    },
+    {
+      "scenario_id": "scn_14",
+      "cause": "authentication_failed",
+      "provenance": "rule",
+      "mapped_from": "error_reason=authentication_failed"
+    },
+    {
+      "scenario_id": "scn_15",
+      "cause": "bank_or_gateway_error",
+      "provenance": "rule",
+      "mapped_from": "error_reason=bank_technical_error"
+    },
+    {
+      "scenario_id": "scn_16",
+      "cause": "limit_exceeded",
+      "provenance": "rule",
+      "mapped_from": "error_reason=transaction_limit_exceeded"
+    },
+    {
+      "scenario_id": "scn_17",
+      "cause": "insufficient_funds",
+      "provenance": "rule",
+      "mapped_from": "error_reason=insufficient_funds"
+    },
+    {
+      "scenario_id": "scn_18",
+      "cause": "instrument_expired_or_blocked",
+      "provenance": "rule",
+      "mapped_from": "error_reason=card_expired"
+    },
+    {
+      "scenario_id": "scn_19",
+      "cause": "bank_or_gateway_error",
+      "provenance": "rule",
+      "mapped_from": "error_reason=bank_technical_error"
+    },
+    {
+      "scenario_id": "scn_20",
+      "cause": "authentication_failed",
+      "provenance": "rule",
+      "mapped_from": "error_reason=authentication_failed"
+    },
+    {
+      "scenario_id": "scn_21",
+      "cause": "authentication_failed",
+      "provenance": "rule",
+      "mapped_from": "error_reason=authentication_failed"
+    },
+    {
+      "scenario_id": "scn_22",
+      "cause": "bank_or_gateway_error",
+      "provenance": "rule",
+      "mapped_from": "error_reason=bank_technical_error"
+    },
+    {
+      "scenario_id": "scn_23",
+      "cause": "mandate_not_active",
+      "provenance": "rule",
+      "mapped_from": "token_status=paused"
+    },
+    {
+      "scenario_id": "scn_24",
+      "cause": "insufficient_funds",
+      "provenance": "rule",
+      "mapped_from": "error_reason=insufficient_funds"
+    },
+    {
+      "scenario_id": "scn_25",
+      "cause": "insufficient_funds",
+      "provenance": "rule",
+      "mapped_from": "error_reason=insufficient_funds"
+    },
+    {
+      "scenario_id": "scn_26",
+      "cause": "limit_exceeded",
+      "provenance": "rule",
+      "mapped_from": "error_reason=transaction_limit_exceeded"
+    },
+    {
+      "scenario_id": "scn_27",
+      "cause": "insufficient_funds",
+      "provenance": "rule",
+      "mapped_from": "error_reason=insufficient_funds"
+    },
+    {
+      "scenario_id": "scn_28",
+      "cause": "bank_or_gateway_error",
+      "provenance": "rule",
+      "mapped_from": "error_reason=bank_technical_error"
+    },
+    {
+      "scenario_id": "scn_29",
+      "cause": "instrument_expired_or_blocked",
+      "provenance": "rule",
+      "mapped_from": "error_reason=card_expired"
+    },
+    {
+      "scenario_id": "scn_30",
+      "cause": "insufficient_funds",
+      "provenance": "rule",
+      "mapped_from": "error_reason=insufficient_funds"
+    },
+    {
+      "scenario_id": "scn_31",
+      "cause": "insufficient_funds",
+      "provenance": "rule",
+      "mapped_from": "error_reason=insufficient_funds"
+    },
+    {
+      "scenario_id": "scn_32",
+      "cause": "authentication_failed",
+      "provenance": "rule",
+      "mapped_from": "error_reason=authentication_failed"
+    },
+    {
+      "scenario_id": "scn_33",
+      "cause": "authentication_failed",
+      "provenance": "rule",
+      "mapped_from": "error_reason=authentication_failed"
+    },
+    {
+      "scenario_id": "scn_35",
+      "cause": "bank_or_gateway_error",
+      "provenance": "rule",
+      "mapped_from": "error_reason=bank_technical_error"
+    },
+    {
+      "scenario_id": "scn_36",
+      "cause": "insufficient_funds",
+      "provenance": "rule",
+      "mapped_from": "error_reason=insufficient_funds"
+    },
+    {
+      "scenario_id": "scn_37",
+      "cause": "authentication_failed",
+      "provenance": "rule",
+      "mapped_from": "error_reason=authentication_failed"
+    },
+    {
+      "scenario_id": "scn_38",
+      "cause": "authentication_failed",
+      "provenance": "rule",
+      "mapped_from": "error_reason=authentication_failed"
+    },
+    {
+      "scenario_id": "scn_39",
+      "cause": "mandate_not_active",
+      "provenance": "rule",
+      "mapped_from": "token_status=paused"
+    },
+    {
+      "scenario_id": "scn_40",
+      "cause": "instrument_expired_or_blocked",
+      "provenance": "rule",
+      "mapped_from": "error_reason=card_expired"
+    },
+    {
+      "scenario_id": "scn_41",
+      "cause": "authentication_failed",
+      "provenance": "rule",
+      "mapped_from": "error_reason=authentication_failed"
+    },
+    {
+      "scenario_id": "scn_42",
+      "cause": "insufficient_funds",
+      "provenance": "rule",
+      "mapped_from": "error_reason=insufficient_funds"
+    },
+    {
+      "scenario_id": "scn_43",
+      "cause": "insufficient_funds",
+      "provenance": "rule",
+      "mapped_from": "error_reason=insufficient_funds"
+    },
+    {
+      "scenario_id": "scn_44",
+      "cause": "insufficient_funds",
+      "provenance": "rule",
+      "mapped_from": "error_reason=insufficient_funds"
+    },
+    {
+      "scenario_id": "scn_46",
+      "cause": "bank_or_gateway_error",
+      "provenance": "rule",
+      "mapped_from": "error_reason=bank_technical_error"
+    },
+    {
+      "scenario_id": "scn_47",
+      "cause": "authentication_failed",
+      "provenance": "rule",
+      "mapped_from": "error_reason=authentication_failed"
+    },
+    {
+      "scenario_id": "scn_49",
+      "cause": "instrument_expired_or_blocked",
+      "provenance": "rule",
+      "mapped_from": "error_reason=card_expired"
+    },
+    {
+      "scenario_id": "scn_50",
+      "cause": "limit_exceeded",
+      "provenance": "rule",
+      "mapped_from": "error_reason=transaction_limit_exceeded"
+    },
+    {
+      "scenario_id": "scn_51",
+      "cause": "insufficient_funds",
+      "provenance": "rule",
+      "mapped_from": "error_reason=insufficient_funds"
+    },
+    {
+      "scenario_id": "scn_52",
+      "cause": "insufficient_funds",
+      "provenance": "rule",
+      "mapped_from": "error_reason=insufficient_funds"
+    },
+    {
+      "scenario_id": "scn_53",
+      "cause": "insufficient_funds",
+      "provenance": "rule",
+      "mapped_from": "error_reason=insufficient_funds"
+    },
+    {
+      "scenario_id": "scn_54",
+      "cause": "insufficient_funds",
+      "provenance": "rule",
+      "mapped_from": "error_reason=insufficient_funds"
+    },
+    {
+      "scenario_id": "scn_55",
+      "cause": "insufficient_funds",
+      "provenance": "rule",
+      "mapped_from": "error_reason=insufficient_funds"
+    },
+    {
+      "scenario_id": "scn_56",
+      "cause": "bank_or_gateway_error",
+      "provenance": "rule",
+      "mapped_from": "error_reason=bank_technical_error"
+    },
+    {
+      "scenario_id": "scn_57",
+      "cause": "bank_or_gateway_error",
+      "provenance": "rule",
+      "mapped_from": "error_reason=bank_technical_error"
+    },
+    {
+      "scenario_id": "scn_58",
+      "cause": "mandate_not_active",
+      "provenance": "rule",
+      "mapped_from": "token_status=paused"
+    },
+    {
+      "scenario_id": "scn_59",
+      "cause": "insufficient_funds",
+      "provenance": "rule",
+      "mapped_from": "error_reason=insufficient_funds"
+    }
+  ]
+}

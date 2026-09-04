@@ -1,0 +1,55 @@
+# Declarative policy table. Evaluated top to bottom: hard_stops first (any match -> block/escalate),
+# then the row matching the request's cause.
+hard_stops:
+  - id: hard_stop.dispute_open
+    when: dispute_open
+    decision: block
+  - id: hard_stop.no_consent
+    when: no_consent
+    action_in: [nudge]
+    decision: block
+  - id: hard_stop.amount_mismatch
+    when: amount_mismatch
+    decision: block
+  - id: hard_stop.subscription_terminal
+    when: subscription_terminal
+    decision: block
+  - id: hard_stop.attempts_exhausted
+    when: attempts_exhausted
+    max_attempts_by_cause:
+      insufficient_funds: 3
+      bank_or_gateway_error: 3
+      authentication_failed: 1
+      instrument_expired_or_blocked: 1
+      mandate_not_active: 1
+      limit_exceeded: 1
+    decision: escalate
+    # NOTE: these three (instrument_expired_or_blocked, mandate_not_active, limit_exceeded)
+    # are capped at 1, not 0. plan_action always sets attempt_no = state.attempt_no + 1, so
+    # the FIRST proposed action already has attempt_no == 1. A cap of 0 would trip this hard
+    # stop before the gate ever reaches the causes.* row below, silently escalating every
+    # occurrence instead of allowing the single payment_link/nudge attempt requirements
+    # document for them ("no retry... once, then escalate"). Verified by test_gate.py.
+
+causes:
+  insufficient_funds:
+    allow_actions: [charge_invoice, payment_link, nudge, escalate]
+    cooldown_seconds: 3600
+  instrument_expired_or_blocked:
+    allow_actions: [payment_link, nudge, escalate]
+    cooldown_seconds: 0
+  authentication_failed:
+    allow_actions: [nudge, escalate]
+    cooldown_seconds: 1800
+  bank_or_gateway_error:
+    allow_actions: [charge_invoice, escalate]
+    cooldown_seconds: 900
+  mandate_not_active:
+    allow_actions: [payment_link, nudge, escalate]
+    cooldown_seconds: 0
+  limit_exceeded:
+    allow_actions: [payment_link, nudge, escalate]
+    cooldown_seconds: 0
+  unknown:
+    allow_actions: [escalate]
+    cooldown_seconds: 0
