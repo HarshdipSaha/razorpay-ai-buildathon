@@ -1,1 +1,1 @@
-Here's the audit log holding up under an actual attack. Verify audit passes. Then I edit one single byte in the log file by hand. Run verify again, and it fails immediately, and tells you exactly which record broke, because every record's hash depends on the one before it.
+Verify passes clean. Then I open the log file and change one byte by hand. Run verify again, and it fails on the exact record I touched. Each entry's hash depends on the one before it, so there's nowhere to hide a change.

@@ -1,42 +1,32 @@
 # Pitch video — script and production notes
 
-**Final video:** `docs/rebound-demo.mp4` — 3:57, 1280×720, h264/aac.
+**Final video:** `docs/rebound-demo.mp4` — 3:05, 1280×720, h264/aac, crossfade transitions between scenes.
 
-## How it was made (reproducible, no manual recording)
+## How it was made (fully reproducible, no screen recording)
 
-Given the "no login, no API key" scope decision, a live screen recording of a
-Razorpay dashboard wasn't available or honest to fake. Instead the video is
-assembled deterministically from **real command output**:
+Given the "no login, no API key" scope decision, a live screen recording of a Razorpay dashboard wasn't available or honest to fake. The video is assembled deterministically from real command output and a real screenshot of the product's own report page:
 
-1. `docs/video/build_slides.py` generates 11 styled HTML slides, each embedding
-   actual captured terminal output (`pytest -q`, `python -m rebound.cli demo`,
-   `verify-audit` before/after a real byte-level tamper) — not typed-up fiction.
-2. Windows SAPI (`System.Speech.Synthesis`, offline, no API key) synthesizes one
-   narration `.wav` per slide from `docs/video/audio/*.txt`.
-3. Each HTML slide is screenshotted at 1280×720 via Playwright (served over a
-   local `http.server`, since headless browsers block `file://`).
-4. `docs/video/assemble.sh` pairs each slide image with its narration clip
-   (`ffmpeg -loop 1 -i slide.png -i narration.wav`, padded 0.6s of silence on
-   each end) and concatenates all 11 into `docs/rebound-demo.mp4`.
+1. **Copy** (`docs/video/_copydesk_final.md`): written with the `copydesk-write` skill, then run through independent prose and craft review passes (banned-phrase / AI-pattern check; concrete-first-opening, naming, and central-point-dwelling check). Named the core mechanism ("words, not wallets") and revised Scene 10 and Scene 11 based on that review before locking the final copy.
+2. **Slides** (`docs/video/build_slides.py`): 11 HTML slides, each a genuinely different composition (no repeated kicker-plus-card template), pulling color/type directly from the product's real UI (`rebound/sim/report_html.py`'s audit-dossier design). Scene 5 embeds a real screenshot of the actual redesigned report page, not a mockup. Reviewed and rebuilt by a dedicated subagent against `impeccable`'s craft-floor bans (no eyebrow/kicker labels, no same-template repetition, no overflow/cramming) — one fix round, confirmed by screenshotting all 11 slides at 1280×720 and reading them back.
+3. **Narration**: Windows SAPI (`System.Speech.Synthesis`, offline, no API key) synthesizes one `.wav` per scene from `docs/video/audio/*.txt`.
+4. **Assembly** (`docs/video/assemble_xfade.py`): pairs each slide image with its narration clip, padded with silence, and chains all 11 through `ffmpeg`'s `xfade` (video) and `acrossfade` (audio) filters for smooth crossfade transitions instead of hard cuts — the technique borrowed from a reference demo video the user pointed to.
 
-Regenerate with: `python docs/video/build_slides.py`, serve `docs/video/slides/`
-on a local port, screenshot each `.html` to a matching `.png`, then
-`bash docs/video/assemble.sh`.
+Regenerate with: `python docs/video/build_slides.py` (rewrites slide HTML from `_copydesk_final.md`), screenshot each `.html` to a matching `.png` in `docs/video/slides/` at 1280×720, regenerate narration via the PowerShell SAPI snippet in `aidlc-docs/process-log.md`, then `python docs/video/assemble_xfade.py`.
 
-## Scene breakdown (narration is verbatim from `docs/video/audio/*.txt`)
+## Scene breakdown (narration verbatim from `docs/video/audio/*.txt` / `_copydesk_final.md`)
 
-| # | Scene | Duration | What's on screen |
+| # | Scene | Narration length | What's on screen |
 |---|---|---|---|
-| 1 | Title / problem | 20.9s | The one-sentence problem statement |
-| 2 | Architecture | 28.1s | Flow diagram + the "LLM explains, code decides" invariant |
-| 3 | Tests | 7.4s | Real `pytest -q` output: 54 passed |
-| 4 | Batch run | 15.8s | Real `rebound demo` output: 0 violations, 0 double charges |
-| 5 | Metrics | 20.2s | 100% held-out accuracy, 5% abstain, 60/60 accounted for |
-| 6 | Idempotency | 22.1s | The engineered failure: 5 duplicate webhooks, 0 double charges |
-| 7 | Abstain | 24.4s | Where the system says "I don't know" instead of guessing |
-| 8 | Tamper | 17.1s | Real before/after `verify-audit` output around a real byte edit |
-| 9 | Scope decision | 30.3s | Why no login/API key is needed, stated explicitly |
-| 10 | What broke | 25.9s | The 3 real bugs from `FAILURES.md` |
-| 11 | Closing | 11.1s | Repo link, summary badges |
+| 1 | Title | 20.1s | The one-sentence problem statement, centered, spare |
+| 2 | Architecture | 24.2s | "Words, not wallets" — a single flow diagram, no cards |
+| 3 | Tests | 7.5s | Real `pytest -q` output: 54 passed |
+| 4 | Batch run | 13.5s | A 3-up verdict strip (0 violations, 0 double charges, 4 escalated) echoing the real report's Exhibit A |
+| 5 | The report | 18.1s | Real screenshot of the redesigned audit-dossier report page |
+| 6 | Idempotency | 16.8s | The engineered failure: 5 duplicate webhooks in, 0 double charges out |
+| 7 | Abstain | 12.3s | Where the system says "I don't know" instead of guessing |
+| 8 | Tamper | 14.3s | Real before/after `verify-audit` output around a real byte edit |
+| 9 | Scope decision | 19.3s | Why no login/API key is needed, as inline facts not a bullet dump |
+| 10 | What broke | 22.9s | 3 bugs, weighted, the one that actually mattered singled out |
+| 11 | Closing | 9.9s | Case-file callback ("CASE CLOSED"), repo link, summary stats |
 
-Total narration: 223.3s; final video with transition padding: 236.6s (3:57).
+Total narration: 178.7s; final video with crossfade transitions: 184.7s (3:05).

@@ -1,1 +1,1 @@
-That's Rebound. Fifty four tests passing, zero policy violations, zero double charges, and a process that's as inspectable as the code. Thanks for watching.
+That's Rebound: words from the model, decisions from the gate, and a ledger that proves which one did what. You don't have to trust the demo. You can read it.
