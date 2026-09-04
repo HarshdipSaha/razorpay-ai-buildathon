@@ -1,0 +1,1 @@
+Before anything else, the whole test suite, running for real on this machine: fifty four tests, all passing.

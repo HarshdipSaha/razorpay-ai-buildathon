@@ -1,0 +1,1 @@
+Razorpay's own subscription retry ladder is fixed. Fail a recurring payment four times, and Razorpay stops trying, moves the subscription to halted, and tells the merchant: charge this customer by hand. Rebound picks up exactly there. It reads why the payment failed, decides what to do about it, and proves every step of that decision.

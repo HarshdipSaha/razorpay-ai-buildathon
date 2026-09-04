@@ -1,0 +1,1 @@
+Razorpay redelivers webhooks at least once, so five of the sixty scenarios get their failure event delivered twice, on purpose. The event id is the only key that matters. The second delivery is rejected before it ever reaches the classifier. Five duplicates rejected, zero double charges. That's not a promise. It's a database constraint.

@@ -15,7 +15,7 @@ When a Razorpay recurring subscription payment fails four times in a row, Razorp
 https://github.com/HarshdipSaha/razorpay-ai-buildathon
 
 ## 5-min Pitch Video Link
-`docs/rebound-demo.mp4` (see README for where this is hosted once uploaded — unlisted YouTube/Loom link to be added before submission)
+`docs/rebound-demo.mp4` in the repo (3:57, 1280×720). **Before submitting the form, upload this to YouTube (unlisted) or Loom and paste that link here** — the form needs a URL, not a repo file.
 
 ## Build Challenges & Technical Obstacles — "What issues did you face while building, and how did you solve them?"
 Three real issues, in the order I hit them (full detail in `FAILURES.md`):

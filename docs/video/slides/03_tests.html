@@ -1,0 +1,41 @@
+<!doctype html><html><head><meta charset='utf-8'>
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; width:1280px; height:720px; font-family: 'Segoe UI', system-ui, sans-serif;
+         background: linear-gradient(135deg,#0f1220 0%,#161a2e 100%); color:#eef0f7; overflow:hidden; }
+  .wrap { padding: 56px 72px; height: 100%; display:flex; flex-direction:column; }
+  .kicker { font-size:20px; letter-spacing:3px; text-transform:uppercase; color:#7dd3fc; font-weight:600; margin-bottom:10px;}
+  h1 { font-size:44px; margin:0 0 18px 0; color:#fff; line-height:1.15; }
+  h2 { font-size:30px; margin:0 0 20px 0; color:#a5b4fc; }
+  p.lead { font-size:22px; line-height:1.5; color:#c9cee0; max-width:1050px; }
+  .grid { display:flex; gap:28px; flex:1; margin-top:10px; }
+  .card { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:14px; padding:24px 28px; }
+  .metric { font-size:52px; font-weight:800; color:#4ade80; }
+  .metric.warn { color:#fbbf24; }
+  .metriclabel { font-size:16px; color:#9aa2c0; margin-top:4px; }
+  table { border-collapse:collapse; width:100%; font-size:18px; }
+  th, td { border:1px solid rgba(255,255,255,0.15); padding:8px 14px; text-align:left; }
+  th { background:rgba(125,211,252,0.15); color:#e0f2fe; }
+  .term { background:#0a0c14; border:1px solid #2a2f45; border-radius:10px; padding:22px 26px;
+          font-family: Consolas, 'Cascadia Mono', monospace; font-size:19px; line-height:1.55; color:#c8f7c5;
+          white-space:pre-wrap; flex:1; overflow:hidden; }
+  .term .dim { color:#8a93b0; }
+  .term .ok { color:#4ade80; font-weight:700; }
+  .term .bad { color:#f87171; font-weight:700; }
+  .badge { display:inline-block; background:#4ade80; color:#0a0c14; font-weight:700; padding:4px 14px;
+           border-radius:20px; font-size:16px; margin-right:8px;}
+  .badge.blue { background:#7dd3fc; }
+  .badge.pink { background:#f0abfc; }
+  .footer { margin-top:auto; font-size:16px; color:#6b7394; display:flex; justify-content:space-between; }
+  ul.plain { font-size:21px; line-height:1.7; color:#dfe3f2; padding-left:26px; }
+  .flow { font-family: Consolas, monospace; font-size:18px; color:#a5b4fc; text-align:center; margin:18px 0;}
+  .center { display:flex; align-items:center; justify-content:center; flex-direction:column; flex:1; text-align:center;}
+</style>
+</head><body><div class='wrap'>
+<div class="kicker">Build quality</div>
+<h1>The whole test suite, run for real</h1>
+<div class="term">$ pytest -q
+<span class="dim">.......................................................</span>
+<span class="ok">54 passed, 1 warning in 5.76s</span></div>
+<div class="footer"><span>Rebound &middot; Razorpay AI Buildathon &middot; Track 3</span><span>github.com/HarshdipSaha/razorpay-ai-buildathon</span></div>
+</div></body></html>
