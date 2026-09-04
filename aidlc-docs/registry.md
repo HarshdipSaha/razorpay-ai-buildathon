@@ -8,8 +8,8 @@ Rebuilt from `inception/*` and `efforts/*/effort-state.md`. Do not edit by hand 
 
 | Stage | Artifact | State |
 |---|---|---|
-| 0 | `inception/00-workspace-detection.md` | awaiting-approval (Gate I-0) |
-| 1 | `inception/01-requirements.md` | blocked — waiting on idea selection (research forks → LLM council) |
+| 0 | `inception/00-workspace-detection.md` | **complete** (Gate I-0: Continue) |
+| 1 | `inception/01-requirements.md` | planning — research done (market ✅, Razorpay API scan ✅, papers 🔄); candidates → LLM council next |
 | 2 | `inception/02-application-design.md` | not started |
 
 ## Efforts

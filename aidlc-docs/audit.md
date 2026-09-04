@@ -8,4 +8,5 @@ Every gate response and every human course-correction, in order. Nothing here is
 | D-2 | 2026-09-04 | Scope of research | — (user interrupt) | **Drop AWS entirely.** "It's not that hack, it's the razorpay one." | Subagent A redirected mid-flight to Razorpay test-mode API scan; its AWS section discarded. |
 | D-3 | 2026-09-04 | Fetch third-party "hackathon-idea-evaluator" page from mcpmarket.com | — (tool call) | **Rejected by user.** | Final idea will be scored against the buildathon's own four published criteria instead. |
 | D-4 | 2026-09-04 | Build methodology | — (user instruction) | **Adopt AI-DLC for every step**, including documenting the skills used, and showcase the process itself in the submission. | This file, `process-log.md`, and `registry.md` exist because of this decision. |
-| I-0 | 2026-09-04 | Inception Stage 0 — workspace detection (greenfield) | Request changes / Continue | *pending* | |
+| I-0 | 2026-09-04 | Inception Stage 0 — workspace detection (greenfield) | Request changes / Continue | **Continue** | Accepted as written: fresh repo, public GitHub, depth dial `standard`. |
+| I-1 | 2026-09-04 | Inception Stage 1 — requirements (idea selected via LLM council) | Request changes / Continue | *pending* | |
