@@ -1,0 +1,25 @@
+# tooling artefacts
+.playwright-mcp/
+.claude/
+
+# secrets
+.env
+.env.*
+!.env.example
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# node
+node_modules/
+dist/
+.next/
+
+# misc
+*.log
+.DS_Store
+Thumbs.db
