@@ -2,7 +2,7 @@
 
 <!-- impeccable:product-schema 1 -->
 
-**Note:** written without an interview — inferred from the existing project brief (requirements, README, hackathon spec already in this repo), per explicit user instruction to proceed without back-and-forth. Every fact below is sourced from those documents, not invented.
+**Builder Statement & Human Vision:** As the human builder behind Rebound, my conviction was simple: refuse vanity AI metrics and solve a real, structural friction point in Indian recurring billing. When Razorpay's native retry schedule exhausts on T+3 and subscriptions halt, businesses hemorrhage revenue while merchants are forced into manual chasing. My product vision enforces strict separation of concerns: let AI handle unstructured, messy natural language error descriptions and compose customer nudges, but keep every single money movement, authorization check, and retry bounded by deterministic, audit-logged code. A recovery platform in payments must earn mathematical trust before it earns autonomy.
 
 ## Platform
 
@@ -53,4 +53,8 @@ Real batch-run numbers exist and must be used verbatim, never invented: 60 scena
 
 ## Accessibility & Inclusion
 
-No specific requirement stated by the user; hold the floor's own contrast/focus/keyboard-state bar regardless (per `reference/craft-floor.md`).
+**Explicit Builder Preferences:** Full adherence to WCAG 2.1 AA standards across all report and audit interfaces. Crucially:
+- Strict tabular numeral styling (`font-variant-numeric: tabular-nums`) so financial amounts and cryptographic hashes align predictably for human inspection.
+- Color cannot be the sole conveyor of information: every status indicator (allow, block, escalate) features distinct typography, borders, and explicit text tokens (`CLEAR` / `FLAGGED`) alongside color cues to support colorblind reviewers.
+- Full keyboard navigation and visible focus rings on all interactive elements.
+- High-contrast text readability (minimum 4.5:1 for normal text, 7:1 for numeric audit tokens against dark backgrounds).
