@@ -67,4 +67,4 @@ All work driven through **Claude Code** (Anthropic's CLI agent). Times are IST, 
 
 ## Where AI was deliberately *not* used
 
-*(to be filled during construction — the buildathon's "AI judgment" criterion explicitly rewards this)*
+AI not used in finalising the idea, it gave a list of example ideas, which seem irrelevant to me, so from the deep research reports,  constructed the idea and pipeline myself.(obv it was refined more)
